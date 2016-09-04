@@ -1,0 +1,88 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>fr.tbr.documentation</groupId>
+	<artifactId>jtxtdoc-core</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+
+	<repositories>
+		<repository>
+			<id>mylyn repo</id>
+			<url>https://repo.eclipse.org/content/repositories/mylyn-snapshots</url>
+		</repository>
+	</repositories>
+	<properties>
+		<mylyn.version>2.7.0-SNAPSHOT</mylyn.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.mylyn.docs</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.asciidoc.core</artifactId>
+			<version>${mylyn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.docs</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.confluence.core</artifactId>
+			<version>${mylyn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.docs</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.core</artifactId>
+			<version>${mylyn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.docs</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.core.ant</artifactId>
+			<version>${mylyn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.docs</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.html.core</artifactId>
+			<version>${mylyn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.docs</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.markdown.core</artifactId>
+			<version>${mylyn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.docs</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.mediawiki.core</artifactId>
+			<version>${mylyn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.docs</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.textile.core</artifactId>
+			<version>${mylyn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.docs</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.tracwiki.core</artifactId>
+			<version>${mylyn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.mylyn.docs</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.twiki.core</artifactId>
+			<version>${mylyn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sourceforge.plantuml</groupId>
+			<artifactId>plantuml</artifactId>
+			<version>8047</version>
+		</dependency>
+
+
+	</dependencies>
+</project>
