@@ -5,7 +5,11 @@
 	<artifactId>jtxtdoc-core</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
-
+    <parent>
+        <groupId>fr.tbr.global</groupId>
+        <artifactId>tbr-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
 	<repositories>
 		<repository>
 			<id>mylyn repo</id>
@@ -81,6 +85,22 @@
 			<groupId>net.sourceforge.plantuml</groupId>
 			<artifactId>plantuml</artifactId>
 			<version>8047</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.tbr.java.general</groupId>
+			<artifactId>java-helpers</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.6.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.6.2</version>
 		</dependency>
 
 

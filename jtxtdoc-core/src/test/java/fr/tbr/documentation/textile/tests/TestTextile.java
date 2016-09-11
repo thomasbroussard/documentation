@@ -3,24 +3,42 @@
  */
 package fr.tbr.documentation.textile.tests;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Date;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.core.parser.builder.HtmlDocumentBuilder;
 import org.eclipse.mylyn.wikitext.core.parser.markup.MarkupLanguage;
-import org.eclipse.mylyn.wikitext.textile.core.TextileLanguage;
 import org.junit.Test;
+
+import fr.tbr.doc.presentation.HtmlPresenter;
+import fr.tbr.doc.textile.TextileToHtml;
+import fr.tbr.helpers.file.FileHelper;
 
 /**
  * @author tbrou
  *
  */
 public class TestTextile {
-	public static final String NAME_TEXTILE = "Textile";
+	private static final Logger LOGGER = LogManager.getLogger(TestTextile.class);
 
 	@Test
-	public void testTextile() {
-		System.out.println(parseByLanguage(new TextileLanguage(), createTextileHelloWorld()));
+	public void testTextileFromFile() throws IOException {
+		LOGGER.debug("beginning transformation from file");
+		TextileToHtml parser = new TextileToHtml();
+		Date beginDate = new Date();
+		String rawHtml = parser.parse(new File("src/test/resources/tomcat-ssl.textile"));
+		LOGGER.debug("transformation achieved, took : {} ms", (new Date()).getTime() - beginDate.getTime());
+		LOGGER.info(rawHtml);
+		HtmlPresenter presenter = new HtmlPresenter();
+		String formattedHtml = presenter.present(rawHtml);
+		LOGGER.info(formattedHtml);
+		FileHelper.writeToFile("target/essai.html", formattedHtml);
+		
 	}
 
 	public static String parseByLanguage(MarkupLanguage language, String wikiText) {
