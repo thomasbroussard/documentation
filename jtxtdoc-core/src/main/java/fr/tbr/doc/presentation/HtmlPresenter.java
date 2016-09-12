@@ -79,11 +79,15 @@ public class HtmlPresenter {
 		Element toc = document.createElement("div");
 		NodeList nodeList = document.getElementsByTagName("*");
 		List<Element> elements = XMLHelper.getElementsFromNodeList(nodeList);
+		Element titleElement = null;
 		for (Element element : elements) {
 			String tagName = element.getTagName();
 			String section = "";
 			String className = "";
 			if ("h2".equals(tagName)) {
+				if (i2 == 0){
+					titleElement = element;
+				}
 				++i2;
 				section = String.valueOf(i2); 
 				className = "lv2";
@@ -111,7 +115,7 @@ public class HtmlPresenter {
 		}
 		toc.setAttribute("id", "toc");
 		Node body = document.getElementsByTagName("body").item(0);
-		body.insertBefore(toc, body.getFirstChild());
+		body.insertBefore(toc, titleElement);
 	}
 
 
