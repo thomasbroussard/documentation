@@ -18,7 +18,7 @@ Depuis l'invite en ligne de commande (démarrée en mode administrateur), tapez:
 
 bc. %JAVA_HOME%\bin\keytool" -genkey -alias tomcat -keyalg RSA -keystore C:\path\to\my\tomcat.keystore
 
-Il faut remplacer le chemin `\path\to\my\tomcat.keystore` par un chemin accessible par la suite.
+Il faut remplacer le chemin @\path\to\my\tomcat.keystore@ par un chemin accessible par la suite.
 Il faut ensuite répondre à l'ensemble des questions posées par l'utilitaire, ce dernier génère le magasin directement au chemin indiqué. 
 Il faut également bien noter le mot de passe utilisé, il sera à renseigner dans l'étape suivante
 
@@ -27,7 +27,7 @@ Il faut également bien noter le mot de passe utilisé, il sera à renseigner da
 
 h3.  Configuration du connecteur https  
 
-Dans le fichier $TOMCAT-INSTALL-ROOT\conf\server.xml rechercher la ligne commentée:
+Dans le fichier @$TOMCAT-INSTALL-ROOT\conf\server.xml@ rechercher la ligne commentée:
 
 bc. <!--
 <Connector port="8443" protocol="org.apache.coyote.http11.Http11Protocol"
