@@ -65,6 +65,27 @@ h3. Tests
 
 Redémarrer le serveur et accéder à l'application sur le port 8443. Le certificat étant autosigné, il n'est pas possible d'éviter l'exception de sécurité.
 
- 
+bc.     @startuml
+    (*)  --> "check input"
+    If "input is verbose" then
+    --> [Yes] "turn on verbosity"
+    --> "run command"
+    else
+    --> "run command"
+    Endif
+    -->(*)
+    @enduml
+    
+bc.  @startuml
+    (*)  --> "check input"
+    If "input is verbose" then
+    --> [Yes] "turn on verbosity"
+    --> "run command"
+    else
+    --> "run command"
+    Endif
+    -->(*)
+    @enduml
+
 
 

@@ -4,6 +4,7 @@
 package fr.tbr.doc.presentation;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,9 @@ import org.xml.sax.SAXException;
 
 import fr.tbr.helpers.file.FileHelper;
 import fr.tbr.helpers.xml.XMLHelper;
+import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.SourceStringReader;
 
 /**
  * @author tbrou
@@ -63,6 +67,7 @@ public class HtmlPresenter {
 			generateToc(document);
 			importScripts(document);
 			importStyleSheets(document);
+			drawDiagrams(document);
 		} catch (ParserConfigurationException | SAXException |	IOException ignored) {
 			LOGGER.error("error while generating the presentation", ignored);
 		}
@@ -158,7 +163,46 @@ public class HtmlPresenter {
 		script.setTextContent("hljs.initHighlightingOnLoad();");
 		script.setAttribute("type","text/javascript" );
 		body.appendChild(script);
-		
+	}
+	
+	private void drawDiagrams(Document document){
+		List<Element> codeBlocks = XMLHelper.getElementsFromNodeList(document.getElementsByTagName("code"));
+		for (Element element : codeBlocks){
+			String textContent = element.getTextContent();
+			if (textContent.startsWith("@startuml")){
+				SourceStringReader reader = new SourceStringReader(textContent);
+				final ByteArrayOutputStream os = new ByteArrayOutputStream();
+				// Write the first image to "os"
+				try {
+					String desc = reader.generateImage(os, new FileFormatOption(FileFormat.SVG));
+					os.close();
+
+					// The XML is stored into svg
+					final String svg = new String(os.toByteArray(), Charset.forName("UTF-8"));
+					Document newDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(svg)));
+					Element newElement = newDoc.getDocumentElement();
+					Node importedNode = document.importNode(newElement, true);
+					Node body = document.getElementsByTagName("body").item(0);
+					Element object = document.createElement("object");
+					object.appendChild(importedNode);
+					body.insertBefore(object,element.getParentNode());
+					body.removeChild(element.getParentNode());
+					
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SAXException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ParserConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+			}
+		}
 	}
 
 }

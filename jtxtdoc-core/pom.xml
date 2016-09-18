@@ -5,11 +5,11 @@
 	<artifactId>jtxtdoc-core</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
-    <parent>
-        <groupId>fr.tbr.global</groupId>
-        <artifactId>tbr-parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>fr.tbr.global</groupId>
+		<artifactId>tbr-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
 	<repositories>
 		<repository>
 			<id>mylyn repo</id>
@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>net.sourceforge.plantuml</groupId>
 			<artifactId>plantuml</artifactId>
-			<version>8047</version>
+			<version>8048-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>fr.tbr.java.general</groupId>
@@ -103,6 +103,10 @@
 			<version>2.6.2</version>
 		</dependency>
 
-
+		<dependency>
+			<groupId>guru.nidi</groupId>
+			<artifactId>graphviz-java</artifactId>
+			<version>0.0.2</version>
+		</dependency>
 	</dependencies>
 </project>

@@ -33,10 +33,10 @@ public class TestTextile {
 		Date beginDate = new Date();
 		String rawHtml = parser.parse(new File("src/test/resources/tomcat-ssl.textile"));
 		LOGGER.debug("transformation achieved, took : {} ms", (new Date()).getTime() - beginDate.getTime());
-		LOGGER.info(rawHtml);
+//		LOGGER.info(rawHtml);
 		HtmlPresenter presenter = new HtmlPresenter();
 		String formattedHtml = presenter.present(rawHtml);
-		LOGGER.info(formattedHtml);
+//		LOGGER.info(formattedHtml);
 		FileHelper.writeToFile("target/essai.html", formattedHtml);
 		
 	}
