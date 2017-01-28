@@ -6,7 +6,8 @@ package fr.tbr.documentation.textile.tests;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Date;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,8 +16,7 @@ import org.eclipse.mylyn.wikitext.core.parser.builder.HtmlDocumentBuilder;
 import org.eclipse.mylyn.wikitext.core.parser.markup.MarkupLanguage;
 import org.junit.Test;
 
-import fr.tbr.doc.presentation.HtmlPresenter;
-import fr.tbr.doc.textile.TextileToHtml;
+import fr.tbr.doc.presentation.TextilePresenter;
 import fr.tbr.helpers.file.FileHelper;
 
 /**
@@ -28,17 +28,55 @@ public class TestTextile {
 
 	@Test
 	public void testTextileFromFile() throws IOException {
-		LOGGER.debug("beginning transformation from file");
-		TextileToHtml parser = new TextileToHtml();
-		Date beginDate = new Date();
-		String rawHtml = parser.parse(new File("src/test/resources/tomcat-ssl.textile"));
-		LOGGER.debug("transformation achieved, took : {} ms", (new Date()).getTime() - beginDate.getTime());
-//		LOGGER.info(rawHtml);
-		HtmlPresenter presenter = new HtmlPresenter();
-		String formattedHtml = presenter.present(rawHtml);
-//		LOGGER.info(formattedHtml);
-		FileHelper.writeToFile("target/essai.html", formattedHtml);
+		TextilePresenter presenter = new TextilePresenter();
+		String baseDir = "src/test/resources";
+		File targetDir = new File("/target/");
+		File directory = new File(baseDir);
+		scanForDocumentation(presenter, targetDir, directory,directory);
 		
+	}
+
+	/**
+	 * @param presenter
+	 * @param targetDir
+	 * @param directory
+	 * @throws IOException
+	 */
+	private void scanForDocumentation(TextilePresenter presenter, File targetDir, File baseDirectory, File directory) throws IOException {
+		File[] files = directory.listFiles(f -> f.getPath().endsWith(".textile"));
+		File[] subDirs = directory.listFiles(f -> f.isDirectory());
+		for (File file : files){
+			String targetFilePath = targetDir.getAbsolutePath() + File.separator + getRelativePath(file, baseDirectory);
+			File targetFile = new File(targetFilePath);
+			if (! targetFile.getParentFile().exists()){
+				targetFile.mkdirs();
+			}
+			
+			Files.copy(file.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			targetFilePath = targetFilePath.replaceAll(".textile", ".html");
+			LOGGER.debug(targetFilePath);
+			String presentedFile;
+			if (file.getName().contains("index.textile")){
+				presentedFile = presenter.presentFile(file);
+			}else{
+				presentedFile = presenter.presentFile(file);
+			}
+			FileHelper.writeToFile(targetFilePath, presentedFile);
+		}
+		for (File file : subDirs){
+			scanForDocumentation(presenter, targetDir, baseDirectory, file);
+		}
+	}
+	
+	// returns null if file isn't relative to folder
+	public static String getRelativePath(File file, File folder) {
+	    String filePath = file.getAbsolutePath();
+	    String folderPath = folder.getAbsolutePath();
+	    if (filePath.startsWith(folderPath)) {
+	        return filePath.substring(folderPath.length() + 1);
+	    } else {
+	        return null;
+	    }
 	}
 
 	public static String parseByLanguage(MarkupLanguage language, String wikiText) {

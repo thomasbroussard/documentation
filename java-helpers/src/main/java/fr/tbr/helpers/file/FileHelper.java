@@ -53,7 +53,8 @@ public class FileHelper {
 			byte[] encoded = Files.readAllBytes(file.toPath());
 			return new String(encoded, encoding);
 		} catch (Exception e) {
-			LOGGER.error("error while reading file" , e);
+			LOGGER.warn("error while reading file" );
+			LOGGER.trace("error", e);
 		}
 		return "";
 	}

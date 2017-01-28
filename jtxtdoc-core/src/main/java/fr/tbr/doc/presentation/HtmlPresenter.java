@@ -25,6 +25,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import fr.tbr.helpers.file.FileHelper;
+import fr.tbr.helpers.html.HTML_ENTITIES;
 import fr.tbr.helpers.xml.XMLHelper;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
@@ -39,8 +40,24 @@ public class HtmlPresenter {
 	/**
 	 * 
 	 */
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+	/**
+	 * 
+	 */
+	private static final String HTML_CLASS_LV4 = "lv4";
+	/**
+	 * 
+	 */
+	private static final String HTML_CLASS_LV3 = "lv3";
+	/**
+	 * 
+	 */
+	private static final String HTML_CLASS_LV2 = "lv2";
+	/**
+	 * 
+	 */
 	private static final Charset UTF8 = Charset.forName("UTF-8");
-	Logger LOGGER = LogManager.getLogger(HtmlPresenter.class);
+	private static final Logger LOGGER = LogManager.getLogger(HtmlPresenter.class);
 
 	private enum Stylesheets{
 		ressources("jtxtdoc-styles.css"),
@@ -78,6 +95,12 @@ public class HtmlPresenter {
 
 	}
 	
+	
+	/**
+	 * Table of content generation
+	 * This takes a document as a parameter, it should be well formed HTML.
+	 * @param document
+	 */
 	private void generateToc(Document document){
 		int i2 = 0, i3 = 0, i4 = 0;
 		
@@ -87,39 +110,39 @@ public class HtmlPresenter {
 		Element titleElement = null;
 		for (Element element : elements) {
 			String tagName = element.getTagName();
-			String section = "";
-			String className = "";
-			if ("h2".equals(tagName)) {
+			String section;
+			String className;
+			if (HTML_ENTITIES.H2.getEntity().equals(tagName)) {
 				if (i2 == 0){
 					titleElement = element;
 				}
 				++i2;
 				section = String.valueOf(i2); 
-				className = "lv2";
+				className = HTML_CLASS_LV2;
 
-			} else if ("h3".equals(tagName)) {
+			} else if (HTML_ENTITIES.H3.getEntity().equals(tagName)) {
 				++i3;
 				section = i2 + "." + i3;
-				className = "lv3";
+				className = HTML_CLASS_LV3;
 
-			} else if ("h4".equals(tagName)) {
+			} else if (HTML_ENTITIES.H4.getEntity().equals(tagName)) {
 				++i4;
 				section = i2 + "." + i3 + "." + i4;
-				className = "lv4";
+				className = HTML_CLASS_LV4;
 			} else {
 				continue;
 			}
 			String refId = "section-"+section;
 			element.setAttribute("id", refId);
-			Element holder = document.createElement("div");
+			Element holder = document.createElement(HTML_ENTITIES.DIV.getEntity());
 			holder.setAttribute("class", className);
-			Element anchor = document.createElement("a");
+			Element anchor = document.createElement(HTML_ENTITIES.A.getEntity());
 			anchor.setTextContent(section +". " + element.getTextContent());
 			anchor.setAttribute("href", "#"+refId);
 			toc.appendChild(holder).appendChild(anchor);
 		}
 		toc.setAttribute("id", "toc");
-		Node body = document.getElementsByTagName("body").item(0);
+		Node body = document.getElementsByTagName(HTML_ENTITIES.BODY.getEntity()).item(0);
 		body.insertBefore(toc, titleElement);
 	}
 
@@ -128,7 +151,7 @@ public class HtmlPresenter {
 	 * @param document
 	 */
 	private void importStyleSheets(Document document) {
-		Node head = document.getElementsByTagName("head").item(0);
+		Node head = document.getElementsByTagName(HTML_ENTITIES.HEAD.getEntity()).item(0);
 		 
 
 		Element style = document.createElement("style");
@@ -138,7 +161,7 @@ public class HtmlPresenter {
 			if (string == null || "".equals(string)){
 				string = FileHelper.readFileFromClasspath(HtmlPresenter.class, "/" + stylesheet.resource, UTF8);
 			}
-			styleContent += System.getProperty("line.separator") + string;
+			styleContent += LINE_SEPARATOR + string;
 		}
 		try {
 			Document newDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader("<style>"+ styleContent +"</style>")));

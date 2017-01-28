@@ -70,6 +70,10 @@ h2.unnumbered:before, h3.unnumbered:before {
 	text-align: left;
 }
 
+#toc div:active {
+    background-color: goldenrod;
+}
+
 #toc a {
 	color: white;
 	text-decoration: none;
@@ -144,6 +148,16 @@ blockquote {
 
 }
 
+object {
+    display: inline-block;
+    border: 1px solid #aaa;
+    border-radius: 2px;
+	text-align: center;
+	padding: 20px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
 pre{
     background-color: #f0f0f0;
 }
@@ -203,6 +217,8 @@ pre code{
         margin-right:auto;
     }
 }
+
+
 @media screen and (min-width: 1910px) {
     blockquote {
         float: none;

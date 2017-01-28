@@ -1,2 +1,4 @@
 eclipse.preferences.version=1
+encoding//src/main/resources=UTF-8
+encoding//src/test/resources/generate-cert.textile=UTF-8
 encoding//src/test/resources/tomcat-ssl.textile=UTF-8
