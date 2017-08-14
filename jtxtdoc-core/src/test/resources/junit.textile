@@ -1,0 +1,130 @@
+h1. Test-Driven Development (TDD), a practical example
+
+
+bq. This page has been fully written by "Carol Guevara":https://www.linkedin.com/in/carolguevara/ and validated by Thomas Broussard
+
+h2. What is TDD?
+
+p. Test-driven development or design (TDD) is a style of software development in which coding and testing are tightly integrated (intertwined) in the form of unit testing and after each test the code is refactored until it conforms to the testing criteria. The process is done as many times as necessary until each unit is working to the desired specifications. 
+
+p. This method can be better defined by the following set of rules:
+
+*   Develop a single unit test that implements a feature of the program
+*   Run the test (Which should fail because the program lacks that feature)
+*   Implement the simplest possible code to comply with the test
+*   Refactor the code until it meets all the specifications
+*   Repeat the same process with other features
+    
+
+p. Using Test-driven Development results in better design, higher quality and ensures that all units in a program have been tested for optimal functionality. Also, because tests are conducted from the beginning of the design cycle time and money spent in debugging at later stages are minimized.
+
+
+h2. JUnit with Maven
+
+
+h3. What is JUnit?
+
+p. JUnit is a widely used open sourced framework used to implement unit testing in Java.
+
+
+h3. What is Maven?
+
+p. Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information. Maven knows from where to download any third party libraries and their dependencies. When using Maven test code and other third party libraries used only for testing are not included when packaging the final application. 
+
+h2. How to Setup JUnit with Maven
+
+
+p. Click on the Help menu and then click on Install New Software.
+
+p. In the next window type "http://download.eclipse.org/technology/m2e/releases/1.4/1.4.0.20130601-0317":http://download.eclipse.org/technology/m2e/releases/1.4/1.4.0.20130601-0317 in the Work with field. Make sure the Maven Integration for Eclipse box is checked then click next.
+
+!images/availableSoftware.png!
+
+
+p. Click next, accept the terms of license agreement, click on Finish.
+
+bq. In my case the process could not be completed since it was already installed in the system.
+Eclipse might need to be restarted.
+
+!images/availableSoftware.png! 
+
+
+
+
+
+h2. Creating a new project with eclipse Neon
+
+p. Click on File -> New -> Other and select Maven Project
+
+!images/newMavenProject.png!
+
+p. Click Next 
+
+!images/mavenNameLocation.png!
+
+p. Click Next 
+
+!images/mavenArchetype.png!
+
+p. The *Group Id* and *Artifact Id* fields need to be completed. Then click on Finish
+
+!images/mavenArchetypeParameters.png!
+
+p. This is the resulted folder structure. Note that the version of the JRE System Library needs to be updated from version 1.5 to 1.8
+
+!images/mavenResultJRE.png!
+
+p. The pom.xml file needs to be modified to change the JRE version
+
+!images/mavenPOMUpdate.png!
+
+p. Then the project needs to be updated. Click on the name of the project, then right click *>Maven* -> *Update Project*
+
+!images/mavenUpdateProject.png!
+
+p. Click Next
+
+!images/mavenUpdateProjectNext.png!
+
+p. The updated version of the JRE should be visible in the folder structure
+
+!images/mavenNewJRE.png!
+
+p. Now to use *JUnit 4* the JUnit library needs to be modified in the pom.xml, then the project needs to be updated again following the steps mentioned above.
+
+!images/JUnitVersionInPOM.png!
+
+
+h2. Testing with JUnit
+
+p. In order to do a simple test using JUnit two small classes have been implemented.
+
+!images/JUnitSumClass.png!
+
+!images/JUnitSumTestClass.png!
+
+!images/runJUnit.png!
+
+!images/JUnitSuccess.png!
+
+h2. How to Setup JUnit with Spring
+
+p. The pom.xml needs to be modified in order to integrate Junit with Spring. Then it will be possible to use Spring Test Framework as well as the Context Package to inject the objects into the test cases.
+
+h2. Sources
+
+p. "http://searchsoftwarequality.techtarget.com":http://searchsoftwarequality.techtarget.com/definition/test-driven-development
+
+p. "http://searchsoftwarequality.techtarget.com":http://searchsoftwarequality.techtarget.com/definition/test-driven-development 
+
+p. "https://www.tutorialspoint.com/junit/junit_test_framework.htm":https://www.tutorialspoint.com/junit/junit_test_framework.htm
+
+p. "https://www.tutorialspoint.com/maven":https://www.tutorialspoint.com/maven
+
+p. "http://www.javacreed.com/why-should-we-use-maven":http://www.javacreed.com/why-should-we-use-maven
+
+p. "https://examples.javacodegeeks.com/core-java/junit/spring-junit-test-example":https://examples.javacodegeeks.com/core-java/junit/spring-junit-test-example
+
+p. "https://www.mkyong.com/unittest/junit-spring-integration-example":https://www.mkyong.com/unittest/junit-spring-integration-example
+
+p. "https://spring.io/guides/gs/maven":https://spring.io/guides/gs/maven

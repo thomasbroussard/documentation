@@ -49,6 +49,7 @@ public class XMLHelper {
 			StringWriter writer = new StringWriter();
 			//transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+//			transformer.setOutputProperty(OutputKeys.CDATA_SECTION_ELEMENTS, "script");
 			//transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 			transformer.transform(new DOMSource(document), new StreamResult(writer));
 			return writer.getBuffer().toString();

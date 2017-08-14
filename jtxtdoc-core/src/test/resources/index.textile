@@ -1,0 +1,12 @@
+h1. textile index
+
+h2. intro
+
+Ceci est un exemple d'include1
+
+
+!include=junit.textile
+
+!include=generate-cert.textile
+
+

@@ -16,7 +16,9 @@ public enum HTML_ENTITIES {
 	BODY("body"),
 	A("a"),
 	DIV("div"),
-	HEAD("head"),
+	HEAD("head"), 
+	STYLE("style"), 
+	SCRIPT("script"),
 	
 	
 	;

@@ -25,6 +25,12 @@ public class TextileToHtml {
 	private static final Logger LOGGER = LogManager.getLogger("HelloWorld");
 	private static final MarkupLanguage textileLanguage = new TextileLanguage();
 	
+	
+	/**
+	 * 
+	 * @param wikiText
+	 * @return
+	 */
 	public String parse(String wikiText) {
 
 		StringWriter writer = new StringWriter();
@@ -35,6 +41,11 @@ public class TextileToHtml {
 	}
 
 	
+	/**
+	 * 
+	 * @param wikiTextFile
+	 * @return
+	 */
 	public String parse(File wikiTextFile) {
 
 		StringWriter writer = new StringWriter();
@@ -44,7 +55,7 @@ public class TextileToHtml {
 		try{
 			content = FileHelper.readFile(wikiTextFile, Charset.forName("UTF-8"));
 		}catch(Exception e){
-			LOGGER.error("error whil trying to read content from file", e);
+			LOGGER.error("error while trying to read content from file", e);
 		}
 		if (content == null){
 			return "";

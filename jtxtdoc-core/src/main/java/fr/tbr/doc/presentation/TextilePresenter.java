@@ -33,24 +33,5 @@ public class TextilePresenter {
 		return formattedHtml;
 		
 	}
-	
-	public String presentIndexFile(File file){
-		Date beginDate = new Date();
-		LOGGER.debug("beginning transformation from file");
-		String html = parser.parse(file);
-		
-		String formattedHtml = presenter.present(html);
-		LOGGER.debug("transformation achieved, took : {} ms", (new Date()).getTime() - beginDate.getTime());
-		return formattedHtml;
-		
-	}
-	
-//	public String presentFile(String filePath){
-//		
-//	}
-//	
-//	public String present(String textileContent){
-//		
-//	}
 
 }
