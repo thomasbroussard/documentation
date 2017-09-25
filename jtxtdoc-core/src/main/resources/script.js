@@ -141,7 +141,7 @@ document.onreadystatechange = function () {
     if (document.readyState == "interactive") {
         bindTOCToggle();
         hljs.initHighlightingOnLoad();
-        document.getElementsByTagName("html")[0].className="compact";
+//        document.getElementsByTagName("html")[0].className="compact";
 
     }
 }

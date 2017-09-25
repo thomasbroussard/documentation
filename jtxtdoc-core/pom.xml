@@ -81,11 +81,13 @@
 			<version>4.12</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/net.sourceforge.plantuml/plantuml -->
 		<dependency>
 			<groupId>net.sourceforge.plantuml</groupId>
 			<artifactId>plantuml</artifactId>
-			<version>8048-SNAPSHOT</version>
+			<version>8048</version>
 		</dependency>
+
 		<dependency>
 			<groupId>fr.tbr.java.general</groupId>
 			<artifactId>java-helpers</artifactId>
@@ -115,7 +117,7 @@
 		<dependency>
 			<groupId>guru.nidi</groupId>
 			<artifactId>graphviz-java</artifactId>
-			<version>0.0.2</version>
+			<version>0.2.2</version>
 		</dependency>
 	</dependencies>
 </project>

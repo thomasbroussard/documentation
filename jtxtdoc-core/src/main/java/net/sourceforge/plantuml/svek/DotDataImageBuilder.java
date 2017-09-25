@@ -5,7 +5,7 @@
  * (C) Copyright 2009-2017, Arnaud Roques
  *
  * Project Info:  http://plantuml.com
- * 
+ *
  * This file is part of PlantUML.
  *
  * PlantUML is free software; you can redistribute it and/or modify it
@@ -25,7 +25,7 @@
  *
  *
  * Original Author:  Arnaud Roques
- * 
+ *
  *
  */
 package net.sourceforge.plantuml.svek;
@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import net.sourceforge.plantuml.BaseFile;
 import net.sourceforge.plantuml.ColorParam;
@@ -137,7 +138,7 @@ public final class DotDataImageBuilder {
 		printGroups(dotStringFactory, dotData.getRootGroup());
 		printEntities(dotStringFactory, getUnpackagedEntities());
 
-		for (Link link : dotData.getLinks()) {
+		for (final Link link : dotData.getLinks()) {
 			if (link.isRemoved()) {
 				continue;
 			}
@@ -167,14 +168,14 @@ public final class DotDataImageBuilder {
 						line.setOpale(true);
 					}
 				}
-			} catch (IllegalStateException e) {
+			} catch (final IllegalStateException e) {
 				e.printStackTrace();
 			}
 		}
 
-//		 if (dotStringFactory.illegalDotExe()) {
-//		 return error(dotStringFactory.getDotExe());
-//		 }
+		//		 if (dotStringFactory.illegalDotExe()) {
+		//		 return error(dotStringFactory.getDotExe());
+		//		 }
 
 		// final boolean trace = OptionFlags.getInstance().isKeepTmpFiles() ||
 		// OptionFlags.TRACE_DOT || isSvekTrace();
@@ -187,11 +188,11 @@ public final class DotDataImageBuilder {
 		final String svg;
 		// svg = dotStringFactory.getSvg(basefile, dotStrings);
 		String dotString = "";
-		for (String str : dotStrings) {
+		for (final String str : dotStrings) {
 			dotString += str + "\n";
 		}
-		
-		svg = Graphviz.fromString(dotStringFactory.createDotString(dotString)).createSvg();
+
+		svg = Graphviz.fromString(dotStringFactory.createDotString(dotString)).render(Format.SVG).toString();
 
 		if (svg.length() == 0) {
 			return new GraphvizCrash(source.getPlainString());
@@ -206,9 +207,9 @@ public final class DotDataImageBuilder {
 			}
 			final SvekResult result = new SvekResult(position, dotData, dotStringFactory);
 			result.moveSvek(6 - minX, -minY);
-			this.maxX = dotStringFactory.getBibliotekon().getMaxX();
+			maxX = dotStringFactory.getBibliotekon().getMaxX();
 			return result;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			Log.error("Exception " + e);
 			throw new UnparsableGraphvizException(e, graphvizVersion, svg, source.getPlainString());
 		}
@@ -231,7 +232,7 @@ public final class DotDataImageBuilder {
 
 	private boolean onlyOneLink(IEntity ent) {
 		int nb = 0;
-		for (Link link : dotData.getLinks()) {
+		for (final Link link : dotData.getLinks()) {
 			if (link.isInvis()) {
 				continue;
 			}
@@ -247,7 +248,7 @@ public final class DotDataImageBuilder {
 
 	private IEntityImage error(File dotExe) {
 
-		final List<String> msg = new ArrayList<String>();
+		final List<String> msg = new ArrayList<>();
 		msg.add("Dot Executable: " + dotExe);
 		final ExeState exeState = ExeState.checkFile(dotExe);
 		msg.add(exeState.getTextMessage());
@@ -265,7 +266,7 @@ public final class DotDataImageBuilder {
 	}
 
 	private void printEntities(DotStringFactory dotStringFactory, Collection<ILeaf> entities2) {
-		for (ILeaf ent : entities2) {
+		for (final ILeaf ent : entities2) {
 			if (ent.isRemoved()) {
 				continue;
 			}
@@ -305,7 +306,7 @@ public final class DotDataImageBuilder {
 
 	private double getMaxWidth(DotStringFactory dotStringFactory) {
 		double result = 0;
-		for (ILeaf ent : dotData.getLeafs()) {
+		for (final ILeaf ent : dotData.getLeafs()) {
 			if (ent.getEntityType().isLikeClass() == false) {
 				continue;
 			}
@@ -326,7 +327,7 @@ public final class DotDataImageBuilder {
 			throw new IllegalStateException();
 		}
 		if (leaf.getEntityType().isLikeClass()) {
-			final EntityImageClass entityImageClass = new EntityImageClass(graphvizVersion, (ILeaf) leaf, skinParam,
+			final EntityImageClass entityImageClass = new EntityImageClass(graphvizVersion, leaf, skinParam,
 					portionShower);
 			final Neighborhood neighborhood = leaf.getNeighborhood();
 			if (neighborhood != null) {
@@ -409,7 +410,7 @@ public final class DotDataImageBuilder {
 				return new EntityImageDescription(leaf, new SkinParamForecolored(skinParam, HtmlColorUtils.BLACK),
 						portionShower);
 			}
-			return new EntityImageEmptyPackage(leaf, skinParam);
+			return new EntityImageEmptyPackage(leaf, skinParam, portionShower);
 		}
 		if (leaf.getEntityType() == LeafType.ASSOCIATION) {
 			return new EntityImageAssociation(leaf, skinParam);
@@ -424,8 +425,8 @@ public final class DotDataImageBuilder {
 	}
 
 	private Collection<ILeaf> getUnpackagedEntities() {
-		final List<ILeaf> result = new ArrayList<ILeaf>();
-		for (ILeaf ent : dotData.getLeafs()) {
+		final List<ILeaf> result = new ArrayList<>();
+		for (final ILeaf ent : dotData.getLeafs()) {
 			if (dotData.getTopParent() == ent.getParentContainer()) {
 				result.add(ent);
 			}
@@ -434,7 +435,7 @@ public final class DotDataImageBuilder {
 	}
 
 	private void printGroups(DotStringFactory dotStringFactory, IGroup parent) {
-		for (IGroup g : dotData.getGroupHierarchy().getChildrenGroups(parent)) {
+		for (final IGroup g : dotData.getGroupHierarchy().getChildrenGroups(parent)) {
 			if (g.isRemoved()) {
 				continue;
 			}
@@ -494,7 +495,7 @@ public final class DotDataImageBuilder {
 		}
 
 		dotStringFactory.openCluster(g, titleAndAttributeWidth, titleAndAttributeHeight, title, stereo);
-		this.printEntities(dotStringFactory, g.getLeafsDirect());
+		printEntities(dotStringFactory, g.getLeafsDirect());
 
 		printGroups(dotStringFactory, g);
 
@@ -542,7 +543,7 @@ public final class DotDataImageBuilder {
 			return "";
 		}
 		final StringBuilder sb = new StringBuilder();
-		for (Map.Entry<Code, Double> ent : maxX.entrySet()) {
+		for (final Map.Entry<Code, Double> ent : maxX.entrySet()) {
 			if (ent.getValue() > warningOrError) {
 				sb.append(ent.getKey() + " is overpassing the width limit.");
 				sb.append("\n");

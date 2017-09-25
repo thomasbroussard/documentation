@@ -13,6 +13,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,4 +61,21 @@ public class XMLHelper {
 		}
 		return "";
 	}
+	
+	
+	public static List<Element> runXpathOnDocument(String xpathExpr, Document document){
+		XPathFactory xpathFactory = XPathFactory.newInstance();
+		javax.xml.xpath.XPathExpression expr;
+		try {
+			expr = xpathFactory.newXPath().compile(xpathExpr);
+			Object xpathEval = expr.evaluate(document, XPathConstants.NODESET);
+			return getElementsFromNodeList((NodeList) xpathEval); 
+		} catch (XPathExpressionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return new ArrayList<Element>();
+	}
+		
 }

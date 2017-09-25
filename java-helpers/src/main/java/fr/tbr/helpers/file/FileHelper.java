@@ -6,10 +6,15 @@ package fr.tbr.helpers.file;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Scanner;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -89,5 +94,65 @@ public class FileHelper {
 		Files.write(Paths.get(targetPath), text.getBytes(Charset.forName("UTF-8")), StandardOpenOption.CREATE);
 		
 	}
+	
+	/**
+	 * Calculates an MD5 checkSum
+	 * @param file
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws IOException
+	 */
+	public static String calculateMD5asHexadecimal(File file){
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try (InputStream is = Files.newInputStream(file.toPath());
+				DigestInputStream dis = new DigestInputStream(is, md)) {
+			Scanner scanner = new Scanner(dis);
+			while (scanner.hasNext()){
+				scanner.next();
+			}
+			scanner.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		byte[] bytes = md.digest();
+		BigInteger bi = new BigInteger(1, bytes);
+		String digest = String.format("%0" + (bytes.length << 1) + "X", bi);
+		return digest;
+	}
 
+	
+	/**
+	 * Computes the path for a file relative to a given base, or fails if the only shared 
+	 * directory is the root and the absolute form is better.
+	 * 
+	 * @param base File that is the base for the result
+	 * @param name File to be "relativized"
+	 * @return the relative name
+	 * @throws IOException if files have no common sub-directories, i.e. at best share the
+	 *                     root prefix "/" or "C:\"
+	 */
+
+	public static String getRelativePathExt(File base, File name) throws IOException  {
+	    File parent = base.getParentFile();
+
+	    if (parent == null) {
+	        throw new IOException("No common directory");
+	    }
+
+	    String bpath = base.toURI().toString();
+	    String fpath = name.toURI().toString();
+
+	    if (fpath.startsWith(bpath)) {
+	        return fpath.substring(bpath.length());
+	    } else {
+	        return (".." + File.separator + getRelativePathExt(parent, name));
+	    }
+	}
 }

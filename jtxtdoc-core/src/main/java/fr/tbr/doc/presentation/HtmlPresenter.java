@@ -216,11 +216,22 @@ public class HtmlPresenter {
 	 * @param document
 	 */
 	private void importScripts(Document document) {
-		Node body = document.getElementsByTagName("body").item(0);
-		String content =  "// <![CDATA[ " + LINE_SEPARATOR +  FileHelper.readFileFromClasspath(HtmlPresenter.class, "/highlight.min.js", UTF8) + LINE_SEPARATOR + "//]]>";
+		Node body = document.getElementsByTagName("body").item(0);		
+		Element script = document.createElement("script");
+		script.setAttribute("src","http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js");
+		script.setAttribute("type","text/javascript" );
+		script.setTextContent(" ");
+		body.appendChild(script);
+		String content = "// <![CDATA[ " + LINE_SEPARATOR +  FileHelper.readFileFromClasspath(HtmlPresenter.class, "/script.js", UTF8) + LINE_SEPARATOR + "//]]>";
 		importContent(document, body, content, HTML_ENTITIES.SCRIPT.getEntity());
-		content = "// <![CDATA[ " + LINE_SEPARATOR +  FileHelper.readFileFromClasspath(HtmlPresenter.class, "/script.js", UTF8) + LINE_SEPARATOR + "//]]>";
-		importContent(document, body, content, HTML_ENTITIES.SCRIPT.getEntity());
+	}
+	
+	private void completeBreadCrumb(Document document){
+		List<Element> elements = XMLHelper.runXpathOnDocument("//p[class='breadcrumb']", document);
+		if (elements.isEmpty()){
+			return;
+		}
+		
 	}
 	
 	private void drawDiagrams(Document document){

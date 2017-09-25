@@ -7,20 +7,16 @@ html.compact {
 }
 
 .compact body {
-    column-count: 2;
-    margin-left: 350px;
-    max-width: 100%;
-    text-align: justify;
-    padding: 20px;
-    background-color: #fff;
-    margin-top: 10px;
-    counter-reset: h1 h2 h3 h4;
-    max-height: 99%;
-    border: 0px;
-    column-gap: 30px;
-    column-rule: #eee;
-    column-rule-style: solid;
-    column-rule-width: 1px;
+	column-count: 2;
+	max-width: 100%;
+	margin-top: 10px;
+	max-height: 99%;
+	border: 0px;
+	column-gap: 30px;
+	column-rule: #eee;
+	column-rule-style: solid;
+	column-rule-width: 1px;
+	padding:20px 10px;
 }
 
 .compact #toc {
@@ -42,7 +38,7 @@ body {
 	text-align: justify;
 	padding: 20px;
 	background-color: #fff;
-	margin-top: 10px;
+	margin-top: 55px;
 	border: 1px solid #ccc;
 	counter-reset: h1 h2 h3 h4;
 	border-radius: 3px;
@@ -56,6 +52,19 @@ img {
 	display: block;
 	margin-left: auto;
 	margin-right: auto;
+}
+
+.breadcrumb {
+	padding: 8px 15px;
+	/* margin-left: -20px; */
+	list-style: none;
+	background-color: #fafafa;
+	border-radius: 3px;
+	position: absolute;
+	top: 10px;
+	width: 1000px;
+	left: 350px;
+	border: 1px solid #aaa;
 }
 
 h4:before {
