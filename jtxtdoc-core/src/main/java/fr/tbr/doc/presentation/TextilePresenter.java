@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package fr.tbr.doc.presentation;
 
@@ -15,23 +15,24 @@ import fr.tbr.doc.textile.TextileToHtml;
  * @author tbrou
  *
  */
-public class TextilePresenter {
-	
+public class TextilePresenter implements Presenter {
+
 	private static final Logger LOGGER = LogManager.getLogger(TextilePresenter.class);
 
-	
-	private TextileToHtml parser = new TextileToHtml();
-	private HtmlPresenter presenter = new HtmlPresenter();
-	
+
+	private final TextileToHtml parser = new TextileToHtml();
+	private final HtmlPresenter presenter = new HtmlPresenter();
+
+	@Override
 	public String presentFile(File file){
-		Date beginDate = new Date();
+		final Date beginDate = new Date();
 		LOGGER.debug("beginning transformation from file");
-		String html = parser.parse(file);
-		
-		String formattedHtml = presenter.present(html);
-		LOGGER.debug("transformation achieved, took : {} ms", (new Date()).getTime() - beginDate.getTime());
+		final String html = parser.parse(file);
+
+		final String formattedHtml = presenter.present(html);
+		LOGGER.debug("transformation achieved, took : {} ms", new Date().getTime() - beginDate.getTime());
 		return formattedHtml;
-		
+
 	}
 
 }

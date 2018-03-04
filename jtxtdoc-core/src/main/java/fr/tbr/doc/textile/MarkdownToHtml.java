@@ -8,18 +8,18 @@ import java.io.File;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.mylyn.wikitext.core.parser.markup.MarkupLanguage;
-import org.eclipse.mylyn.wikitext.textile.core.TextileLanguage;
+import org.eclipse.mylyn.wikitext.markdown.core.MarkdownLanguage;
 
 /**
  * @author tbrou
  *
  */
-public class TextileToHtml {
+public class MarkdownToHtml {
 
-	private static final Logger LOGGER = LogManager.getLogger(TextileToHtml.class);
-	private static final MarkupLanguage textileLanguage = new TextileLanguage();
+	private static final Logger LOGGER = LogManager.getLogger(MarkdownToHtml.class);
+	private static final MarkupLanguage markdown = new MarkdownLanguage();
+
 	private static final GenericTextToHtml genericParser = new GenericTextToHtml();
-
 
 	/**
 	 *
@@ -27,8 +27,7 @@ public class TextileToHtml {
 	 * @return
 	 */
 	public String parse(String wikiText) {
-
-		return genericParser.parse(wikiText, textileLanguage);
+		return genericParser.parse(wikiText, markdown);
 	}
 
 
@@ -38,7 +37,7 @@ public class TextileToHtml {
 	 * @return
 	 */
 	public String parse(File wikiTextFile) {
-		return genericParser.parse(wikiTextFile, textileLanguage);
+		return genericParser.parse(wikiTextFile, markdown);
 	}
 
 

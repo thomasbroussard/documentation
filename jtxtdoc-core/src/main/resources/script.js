@@ -28,7 +28,7 @@ function bindTOCToggle(){
 
            // Calculate how far and how fast to scroll
            var startLocation = window.pageYOffset;
-           var offSet = document.body.getElementsByTagName("*")[0].offsetLeft - 120;
+           var offSet = document.body.getElementsByTagName("*")[0].offsetLeft;
            var startXLocation = window.pageXOffset;
            var endLocation = anchor.offsetTop;
            var endXLocation = anchor.offsetLeft - offSet;
@@ -83,14 +83,22 @@ function bindTOCToggle(){
                 // page
                stopAnimationX = function () {
                    var travelled = window.pageXOffset;
-                   if ( (travelled >= (endXLocation - incrementsX)) || ((window.innerWidth + travelled) >= document.body.scrollWidth) ) {
+                   if ( travelled >= (endXLocation - incrementsX)){
+                       window.scrollBy(endXLocation- travelled, 0);
+                       clearInterval(runAnimationX);
+                   }
+                   if ( ((window.innerWidth + travelled) >= document.body.scrollWidth) ) {
                        clearInterval(runAnimationX);
                    }
                };
            } else {   
                stopAnimationX = function () {
                    var travelled = window.pageXOffset;
-                   if ( travelled <= (endXLocation || 0) ) {
+                   if ((travelled + incrementsX) <= endXLocation){
+                        window.scrollBy(endXLocation- travelled, 0);
+                        clearInterval(runAnimationX);
+                   }
+                   if ( travelled <=  0 ) {
                        clearInterval(runAnimationX);
                    }
                };
