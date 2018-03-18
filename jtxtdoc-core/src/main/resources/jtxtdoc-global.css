@@ -76,6 +76,13 @@ img {
 	border: 1px solid #aaa;
 }
 
+
+@page {
+  @bottom-right {
+    content: counter(page) "/ " counter(pages);
+  }
+}
+
 h4:before {
 	content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4)
 		".  ";

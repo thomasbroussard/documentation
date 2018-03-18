@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.apache.logging.log4j.LogManager;
@@ -26,11 +27,12 @@ public class DocumentationSourceProcessor {
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-
-
 	private final File baseDirectory;
 	private final File targetDir;
 
+	private boolean force;
+
+	private boolean processBreadCrumbs;
 
 	/**
 	 * @param targetDir2
@@ -46,8 +48,6 @@ public class DocumentationSourceProcessor {
 		scanForDocumentation(presenter, targetDir, baseDirectory, baseDirectory, force);
 	}
 
-
-
 	/**
 	 * @param presenter
 	 * @param targetDir
@@ -55,12 +55,11 @@ public class DocumentationSourceProcessor {
 	 * @throws IOException
 	 */
 	private void scanForDocumentation(Presenter presenter, File targetDir, File baseDirectory, File directory,
-			boolean force)
-					throws IOException {
+			boolean force) throws IOException {
 		final File[] files = directory.listFiles(f -> !f.isDirectory());
 		final File[] subDirs = directory.listFiles(f -> f.isDirectory());
 		for (final File file : files) {
-			processFile(presenter, targetDir, baseDirectory, file, force);
+			processFile(presenter, targetDir, baseDirectory, file);
 		}
 		for (final File currentSubDir : subDirs) {
 			scanForDocumentation(presenter, targetDir, baseDirectory, currentSubDir, force);
@@ -78,8 +77,7 @@ public class DocumentationSourceProcessor {
 	 * @param file
 	 * @throws IOException
 	 */
-	private String processFile(Presenter presenter, File targetDir, File baseDirectory, File file, boolean force)
-			throws IOException {
+	private String processFile(Presenter presenter, File targetDir, File baseDirectory, File file) throws IOException {
 		String targetFilePath = targetDir.getAbsolutePath() + File.separator
 				+ FileHelper.getRelativePathExt(baseDirectory, file);
 		final File targetFile = new File(targetFilePath);
@@ -97,9 +95,12 @@ public class DocumentationSourceProcessor {
 		}
 		if (file.getPath().endsWith(".textile")) {
 			processInclusions(file, targetFilePath);
-			processBreadCrumbs(targetFile, targetDir);
+			if (processBreadCrumbs) {
+				processBreadCrumbs(targetFile, targetDir);
+			}
 			if (targetFile.exists()) {
-				final String md5Content = FileHelper.readFile(new File(targetFilePath.replaceAll(".textile", ".md5")),
+				final String md5Content = FileHelper.readFile(
+						new File(targetFilePath.replaceAll(presenter.getSourceExtension(), ".md5")),
 						StandardCharsets.UTF_8);
 				if (md5Content != null && !force) {
 					if (md5Content.equals(FileHelper.calculateMD5asHexadecimal(targetFile))) {
@@ -108,12 +109,12 @@ public class DocumentationSourceProcessor {
 					}
 				}
 			}
-			targetFilePath = targetFilePath.replaceAll(".textile", ".html");
+			targetFilePath = targetFilePath.replaceAll(presenter.getSourceExtension(), presenter.getTargetExtension());
 			LOGGER.debug(targetFilePath);
-			final String presentedFile = presenter.presentFile(targetFile);
+			final byte[] presentedFile = presenter.presentFile(targetFile);
 
 			FileHelper.writeToFile(targetFilePath, presentedFile);
-			FileHelper.writeToFile(targetFilePath.replaceAll(".html", ".md5"),
+			FileHelper.writeToFile(targetFilePath.replaceAll(presenter.getTargetExtension(), ".md5"),
 					FileHelper.calculateMD5asHexadecimal(targetFile));
 
 		}
@@ -168,31 +169,106 @@ public class DocumentationSourceProcessor {
 
 		String absolutePath = basePath.getPath();
 		String currentPart = absolutePath;
-		while (i < fileParts.length) {
-			String relativePath = "";
-			DocumentMetadata meta;
-			final File metadataFile = new File(absolutePath + "/metadata.json");
-			if (!metadataFile.exists()) {
-				meta = new DocumentMetadata();
-				meta.setDocumentName(fileParts[i]);
-			} else {
-				meta = DocumentMetadata.fromFile(metadataFile);
-			}
-			for (int j = 0; j < fileParts.length - i; j++) {
-				relativePath += "../";
-			}
-			breadCrumb += "\"" + meta.getDocumentName() + "\":" + relativePath + currentPart + " > ";
-
+		while (i < fileParts.length - 1) {
 			absolutePath += "/" + fileParts[i];
 			currentPart = fileParts[i];
+			String relativePath = "";
+			DocumentMetadata meta;
+			meta = getMetaData(fileParts[i], absolutePath);
+			for (int j = 0; j < fileParts.length - 1 - i; j++) {
+				relativePath += "../";
+			}
+			if (meta.isActive()) {
+				breadCrumb += "\"" + meta.getDocumentName() + "\":" + relativePath + currentPart + " > ";
+			} else {
+				breadCrumb += meta.getDocumentName() + " > ";
+			}
+
+
+
+
 
 			i++;
 		}
-
-		breadCrumb += fileParts[fileParts.length - 1];
+		final String filePart = fileParts[fileParts.length - 1];
+		final DocumentMetadata metadata = getMetaData(filePart, file.getParentFile().getAbsolutePath());
+		final Map<String, String> files = metadata.getFiles();
+		String displayedFileName = filePart;
+		if (files != null) {
+			displayedFileName = files.get(filePart);
+		}
+		breadCrumb += displayedFileName == null ? filePart.split("\\.")[0] : displayedFileName;
 		beforeTransformationContent += LINE_SEPARATOR + breadCrumb;
 		FileHelper.writeToFile(file.getAbsolutePath(), beforeTransformationContent);
 
+	}
+
+	/**
+	 * <h3>Description</h3>
+	 * <p>
+	 * This methods allows to ...
+	 * </p>
+	 *
+	 * <h3>Usage</h3>
+	 * <p>
+	 * It should be used as follows :
+	 *
+	 * <pre>
+	 * <code> ${enclosing_type} sample;
+	 *
+	 * //...
+	 *
+	 * sample.${enclosing_method}();
+	 *</code>
+	 * </pre>
+	 * </p>
+	 *
+	 * @since $${version}
+	 * @see Voir aussi $${link}
+	 * @author ${user}
+	 *
+	 *         ${tags}
+	 */
+	private DocumentMetadata getMetaData(String filePart, String absolutePath) {
+		DocumentMetadata meta;
+		final File metadataFile = new File(absolutePath + "/metadata.json");
+		if (!metadataFile.exists()) {
+			meta = new DocumentMetadata();
+			meta.setDocumentName(filePart);
+		} else {
+			meta = DocumentMetadata.fromFile(metadataFile);
+		}
+		return meta;
+	}
+
+	/**
+	 * @return the processBreadCrumbs
+	 */
+	public boolean isProcessBreadCrumbs() {
+		return processBreadCrumbs;
+	}
+
+	/**
+	 * @param processBreadCrumbs
+	 *            the processBreadCrumbs to set
+	 */
+	public void setProcessBreadCrumbs(boolean processBreadCrumbs) {
+		this.processBreadCrumbs = processBreadCrumbs;
+	}
+
+	/**
+	 * @return the force
+	 */
+	public boolean isForce() {
+		return force;
+	}
+
+	/**
+	 * @param force
+	 *            the force to set
+	 */
+	public void setForce(boolean force) {
+		this.force = force;
 	}
 
 }

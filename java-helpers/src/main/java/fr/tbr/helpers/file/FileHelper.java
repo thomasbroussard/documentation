@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package fr.tbr.helpers.file;
 
@@ -26,11 +26,11 @@ import fr.tbr.helpers.string.StringHelper;
  *
  */
 public class FileHelper {
-	private static final Logger LOGGER = LogManager.getLogger(FileHelper.class); 
+	private static final Logger LOGGER = LogManager.getLogger(FileHelper.class);
 
 	/**
 	 * gets the content of a file path
-	 * 
+	 *
 	 * @param path
 	 *            the path of the file to be read
 	 * @param encoding
@@ -39,13 +39,13 @@ public class FileHelper {
 	 * @throws IOException
 	 */
 	public static String readFile(String path, Charset encoding) throws IOException {
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		final byte[] encoded = Files.readAllBytes(Paths.get(path));
 		return new String(encoded, encoding);
 	}
 
 	/**
 	 * gets the content of a file from a File instance
-	 * 
+	 *
 	 * @param file
 	 *            the file to be read
 	 * @param encoding
@@ -55,20 +55,20 @@ public class FileHelper {
 	 */
 	public static String readFile(File file, Charset encoding) {
 		try {
-			byte[] encoded = Files.readAllBytes(file.toPath());
+			final byte[] encoded = Files.readAllBytes(file.toPath());
 			return new String(encoded, encoding);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("error while reading file" );
 			LOGGER.trace("error", e);
 		}
 		return "";
 	}
 
-	
+
 
 	/**
 	 * gets the content of a file from a File instance
-	 * 
+	 *
 	 * @param file
 	 *            the file to be read
 	 * @param encoding
@@ -78,9 +78,9 @@ public class FileHelper {
 	 */
 	public static String readFileFromClasspath(Class<?> callingClass, String classPathLocation, Charset encoding) {
 		try {
-			InputStream is = callingClass.getResourceAsStream(classPathLocation);
+			final InputStream is = callingClass.getResourceAsStream(classPathLocation);
 			return StringHelper.toString(is);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("error while reading file" , e);
 		}
 		return "";
@@ -88,15 +88,25 @@ public class FileHelper {
 
 	/**
 	 * @param formattedHtml
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void writeToFile(String targetPath, String text) throws IOException {
 		Files.write(Paths.get(targetPath), text.getBytes(Charset.forName("UTF-8")), StandardOpenOption.CREATE);
-		
+
 	}
-	
+
+	/**
+	 * @param formattedHtml
+	 * @throws IOException
+	 */
+	public static void writeToFile(String targetPath, byte[] text) throws IOException {
+		Files.write(Paths.get(targetPath), text, StandardOpenOption.CREATE);
+
+	}
+
 	/**
 	 * Calculates an MD5 checkSum
+	 * 
 	 * @param file
 	 * @return
 	 * @throws NoSuchAlgorithmException
@@ -106,32 +116,32 @@ public class FileHelper {
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e) {
+		} catch (final NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try (InputStream is = Files.newInputStream(file.toPath());
 				DigestInputStream dis = new DigestInputStream(is, md)) {
-			Scanner scanner = new Scanner(dis);
+			final Scanner scanner = new Scanner(dis);
 			while (scanner.hasNext()){
 				scanner.next();
 			}
 			scanner.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		byte[] bytes = md.digest();
-		BigInteger bi = new BigInteger(1, bytes);
-		String digest = String.format("%0" + (bytes.length << 1) + "X", bi);
+		final byte[] bytes = md.digest();
+		final BigInteger bi = new BigInteger(1, bytes);
+		final String digest = String.format("%0" + (bytes.length << 1) + "X", bi);
 		return digest;
 	}
 
-	
+
 	/**
-	 * Computes the path for a file relative to a given base, or fails if the only shared 
+	 * Computes the path for a file relative to a given base, or fails if the only shared
 	 * directory is the root and the absolute form is better.
-	 * 
+	 *
 	 * @param base File that is the base for the result
 	 * @param name File to be "relativized"
 	 * @return the relative name
@@ -140,19 +150,19 @@ public class FileHelper {
 	 */
 
 	public static String getRelativePathExt(File base, File name) throws IOException  {
-	    File parent = base.getParentFile();
+		final File parent = base.getParentFile();
 
-	    if (parent == null) {
-	        throw new IOException("No common directory");
-	    }
+		if (parent == null) {
+			throw new IOException("No common directory");
+		}
 
-	    String bpath = base.toURI().toString();
-	    String fpath = name.toURI().toString();
+		final String bpath = base.toURI().toString();
+		final String fpath = name.toURI().toString();
 
-	    if (fpath.startsWith(bpath)) {
-	        return fpath.substring(bpath.length());
-	    } else {
-	        return (".." + File.separator + getRelativePathExt(parent, name));
-	    }
+		if (fpath.startsWith(bpath)) {
+			return fpath.substring(bpath.length());
+		} else {
+			return ".." + File.separator + getRelativePathExt(parent, name);
+		}
 	}
 }

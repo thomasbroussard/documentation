@@ -10,7 +10,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import fr.tbr.doc.presentation.TextilePresenter;
+import com.lowagie.text.DocumentException;
+
+import fr.tbr.doc.presentation.TextileToHtmlPresenter;
+import fr.tbr.doc.presentation.TextileToPDFPresenter;
 import fr.tbr.doc.transformer.DocumentationSourceProcessor;
 import fr.tbr.helpers.file.FileHelper;
 
@@ -25,14 +28,43 @@ public class TestTextile {
 
 	private static final Logger LOGGER = LogManager.getLogger(TestTextile.class);
 
-	@Test
+	// @Test
 	public void testTextileFromFile() throws IOException {
-		final TextilePresenter presenter = new TextilePresenter();
+		final TextileToHtmlPresenter presenter = new TextileToHtmlPresenter();
 		final String basePath = "src/test/resources";
 		final String targetPath = "target/";
 		final File targetDir = new File(targetPath);
 		final File baseDir = new File(basePath);
 		final DocumentationSourceProcessor processor = new DocumentationSourceProcessor(targetDir, baseDir);
+		processor.setForce(true);
+		processor.setProcessBreadCrumbs(true);
+		processor.process(presenter, true);
+	}
+
+	@Test
+	public void processTutorials() throws IOException {
+		final TextileToHtmlPresenter presenter = new TextileToHtmlPresenter();
+		final String basePath = "src/test/resources";
+		final String targetPath = "target";
+		final File targetDir = new File(targetPath);
+		final File baseDir = new File(basePath);
+		final DocumentationSourceProcessor processor = new DocumentationSourceProcessor(targetDir, baseDir);
+		processor.setForce(true);
+		processor.setProcessBreadCrumbs(true);
+		processor.process(presenter, true);
+	}
+
+
+	// @Test
+	public void testPDFFromHtmlFile() throws IOException, DocumentException {
+		final TextileToPDFPresenter presenter = new TextileToPDFPresenter();
+		final String basePath = "src/test/resources";
+		final String targetPath = "target/";
+		final File targetDir = new File(targetPath);
+		final File baseDir = new File(basePath);
+		final DocumentationSourceProcessor processor = new DocumentationSourceProcessor(targetDir, baseDir);
+		processor.setForce(true);
+		processor.setProcessBreadCrumbs(false);
 		processor.process(presenter, true);
 
 	}

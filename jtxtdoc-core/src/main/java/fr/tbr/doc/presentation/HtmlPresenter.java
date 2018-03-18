@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package fr.tbr.doc.presentation;
 
@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,30 +36,30 @@ import net.sourceforge.plantuml.SourceStringReader;
  * @author tbrou
  *
  */
-public class HtmlPresenter {
+public class HtmlPresenter implements Presenter {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	/**
-	 * 
+	 *
 	 */
 	private static final String HTML_CLASS_LV4 = "lv4";
 	/**
-	 * 
+	 *
 	 */
 	private static final String HTML_CLASS_LV3 = "lv3";
 	/**
-	 * 
+	 *
 	 */
 	private static final String HTML_CLASS_LV2 = "lv2";
-	
-	
-	
+
+
+
 	private static final String HTML_CLASS_LV1 = "lv1";
 	/**
-	 * 
+	 *
 	 */
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final Logger LOGGER = LogManager.getLogger(HtmlPresenter.class);
@@ -68,23 +69,23 @@ public class HtmlPresenter {
 		ressources("jtxtdoc-styles.css"),
 		highlight("default.highlight.css"),
 		custom("jtxtdoc-global.css");
-		
-		
-		private String resource;
+
+
+		private final String resource;
 		/**
-		 * 
+		 *
 		 */
 		private Stylesheets(String resource) {
 			this.resource = resource;
 		}
 	}
-	
-	
+
+
 	public String present(String htmlSource) {
-		
+
 		Document document = null;
 		try {
-			InputStream is = new ByteArrayInputStream( htmlSource.getBytes( UTF8 ) );
+			final InputStream is = new ByteArrayInputStream( htmlSource.getBytes( UTF8 ) );
 			document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
 			generateToc(document);
 			importScripts(document);
@@ -96,34 +97,39 @@ public class HtmlPresenter {
 		if (document == null){
 			return "";
 		}
-		return XMLHelper.documentToString(document);
+		String string = XMLHelper.documentToString(document, "xhtml");
+		// protect script cdata sections
+		string = string.replaceAll("\\<\\!\\[CDATA\\[", "/*<![CDATA[*/");
+		string = string.replaceAll("\\]\\]\\>", "/*]]>*/");
+
+		return string;
 
 	}
-	
+
 	private void generateBreadCrumbs(Document document){
-		Element body = (Element) document.getElementsByTagName("body").item(0);
-		Element firstBodyElement = (Element) body.getElementsByTagName("*").item(0);
-		
-		
-		
-		
+		final Element body = (Element) document.getElementsByTagName("body").item(0);
+		final Element firstBodyElement = (Element) body.getElementsByTagName("*").item(0);
+
+
+
+
 	}
-	
-	
+
+
 	/**
 	 * Table of content generation
 	 * This takes a document as a parameter, it should be well formed HTML.
 	 * @param document
 	 */
-	private void generateToc(Document document){
+	protected void generateToc(Document document) {
 		int i2 = 0, i3 = 0, i4 = 0, i1 = 0;
-		
-		Element toc = document.createElement("div");
-		NodeList nodeList = document.getElementsByTagName("*");
-		List<Element> elements = XMLHelper.getElementsFromNodeList(nodeList);
+
+		final Element toc = document.createElement("div");
+		final NodeList nodeList = document.getElementsByTagName("*");
+		final List<Element> elements = XMLHelper.getElementsFromNodeList(nodeList);
 		Element titleElement = null;
-		for (Element element : elements) {
-			String tagName = element.getTagName();
+		for (final Element element : elements) {
+			final String tagName = element.getTagName();
 			String section = "";
 			String className;
 			if (HTML_ENTITIES.H1.getEntity().equals(tagName)) {
@@ -131,13 +137,14 @@ public class HtmlPresenter {
 					titleElement = element;
 				}
 				++i1;
-				section = String.valueOf(i1); 
+				section = String.valueOf(i1);
 				className = HTML_CLASS_LV1;
 				i2 = 0;
 
-			} 
+
+			}
 			else if (HTML_ENTITIES.H2.getEntity().equals(tagName)) {
-				if (i2 == 0){
+				if (i2 == 0 && titleElement == null) {
 					titleElement = element;
 				}
 				++i2;
@@ -158,19 +165,26 @@ public class HtmlPresenter {
 			} else {
 				continue;
 			}
-			String refId = "section-"+section;
+			final String refId = "section-"+section;
 			element.setAttribute("id", refId);
-			Element holder = document.createElement(HTML_ENTITIES.DIV.getEntity());
+			final Element holder = document.createElement(HTML_ENTITIES.DIV.getEntity());
 			holder.setAttribute("class", className);
-			Element anchor = document.createElement(HTML_ENTITIES.A.getEntity());
+			final Element anchor = document.createElement(HTML_ENTITIES.A.getEntity());
 			anchor.setTextContent(section.replaceAll("\\-", ".") +". " + element.getTextContent());
 			anchor.setAttribute("href", "#"+refId);
 			anchor.setAttribute("class", "scroll");
-	
+
 			toc.appendChild(holder).appendChild(anchor);
 		}
 		toc.setAttribute("id", "toc");
-		Node body = document.getElementsByTagName(HTML_ENTITIES.BODY.getEntity()).item(0);
+		final Node body = document.getElementsByTagName(HTML_ENTITIES.BODY.getEntity()).item(0);
+		final Element title = document.createElement("title");
+		if (titleElement != null) {
+			title.setTextContent(titleElement.getTextContent());
+		}
+
+		final Node head = document.getElementsByTagName(HTML_ENTITIES.HEAD.getEntity()).item(0);
+		head.appendChild(title);
 		body.insertBefore(toc, titleElement);
 	}
 
@@ -179,11 +193,11 @@ public class HtmlPresenter {
 	 * @param document
 	 */
 	private void importStyleSheets(Document document) {
-		Node head = document.getElementsByTagName(HTML_ENTITIES.HEAD.getEntity()).item(0);
-		 
+		final Node head = document.getElementsByTagName(HTML_ENTITIES.HEAD.getEntity()).item(0);
+
 
 		String styleContent= "";
-		for (Stylesheets stylesheet : Stylesheets.values()){
+		for (final Stylesheets stylesheet : Stylesheets.values()){
 			String string = FileHelper.readFile(new File(stylesheet.resource), UTF8);
 			if (string == null || "".equals(string)){
 				string = FileHelper.readFileFromClasspath(HtmlPresenter.class, "/" + stylesheet.resource, UTF8);
@@ -191,7 +205,7 @@ public class HtmlPresenter {
 			styleContent += LINE_SEPARATOR + string;
 		}
 		importContent(document, head, styleContent, HTML_ENTITIES.STYLE.getEntity());
-		
+
 	}
 
 
@@ -202,9 +216,9 @@ public class HtmlPresenter {
 	 */
 	private Element importContent(Document document, Node target, String content, String type) {
 		try {
-			Document newDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader("<"+type+">"+ content + "</"+type+">")));
-			Element newElement = newDoc.getDocumentElement();
-			Node importedNode = document.importNode(newElement, true);
+			final Document newDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader("<"+type+">"+ content + "</"+type+">")));
+			final Element newElement = newDoc.getDocumentElement();
+			final Node importedNode = document.importNode(newElement, true);
 			target.appendChild(importedNode);
 			return (Element) importedNode;
 		} catch (SAXException | IOException | ParserConfigurationException e) {
@@ -216,30 +230,31 @@ public class HtmlPresenter {
 	 * @param document
 	 */
 	private void importScripts(Document document) {
-		Node body = document.getElementsByTagName("body").item(0);		
-		Element script = document.createElement("script");
+		final Node body = document.getElementsByTagName("body").item(0);
+		final Element script = document.createElement("script");
 		script.setAttribute("src","http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js");
 		script.setAttribute("type","text/javascript" );
 		script.setTextContent(" ");
 		body.appendChild(script);
-		String content = "// <![CDATA[ " + LINE_SEPARATOR +  FileHelper.readFileFromClasspath(HtmlPresenter.class, "/script.js", UTF8) + LINE_SEPARATOR + "//]]>";
+		final String content = "<![CDATA[ " + LINE_SEPARATOR
+				+ FileHelper.readFileFromClasspath(HtmlPresenter.class, "/script.js", UTF8) + LINE_SEPARATOR + "]]>";
 		importContent(document, body, content, HTML_ENTITIES.SCRIPT.getEntity());
 	}
-	
+
 	private void completeBreadCrumb(Document document){
-		List<Element> elements = XMLHelper.runXpathOnDocument("//p[class='breadcrumb']", document);
+		final List<Element> elements = XMLHelper.runXpathOnDocument("//p[class='breadcrumb']", document);
 		if (elements.isEmpty()){
 			return;
 		}
-		
+
 	}
-	
-	private void drawDiagrams(Document document){
-		List<Element> codeBlocks = XMLHelper.getElementsFromNodeList(document.getElementsByTagName("code"));
-		for (Element element : codeBlocks){
-			String textContent = element.getTextContent();
+
+	protected void drawDiagrams(Document document) {
+		final List<Element> codeBlocks = XMLHelper.getElementsFromNodeList(document.getElementsByTagName("code"));
+		for (final Element element : codeBlocks){
+			final String textContent = element.getTextContent();
 			if (textContent.startsWith("@startuml")){
-				SourceStringReader reader = new SourceStringReader(textContent);
+				final SourceStringReader reader = new SourceStringReader(textContent);
 				final ByteArrayOutputStream os = new ByteArrayOutputStream();
 				// Write the first image to "os"
 				try {
@@ -247,28 +262,58 @@ public class HtmlPresenter {
 					os.close();
 					// The XML is stored into svg
 					final String svg = new String(os.toByteArray(), Charset.forName("UTF-8"));
-					Document newDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(svg)));
-					Element newElement = newDoc.getDocumentElement();
-					Node importedNode = document.importNode(newElement, true);
-					Node body = document.getElementsByTagName("body").item(0);
-					Element object = document.createElement("object");
+					final Document newDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(svg)));
+					final Element newElement = newDoc.getDocumentElement();
+					final Node importedNode = document.importNode(newElement, true);
+					final Node body = document.getElementsByTagName("body").item(0);
+					final Element object = document.createElement("object");
 					object.appendChild(importedNode);
 					body.insertBefore(object,element.getParentNode());
-					body.removeChild(element.getParentNode());					
-				} catch (IOException e) {
+					body.removeChild(element.getParentNode());
+				} catch (final IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (SAXException e) {
+				} catch (final SAXException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (ParserConfigurationException e) {
+				} catch (final ParserConfigurationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				
+
+
 			}
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see fr.tbr.doc.presentation.Presenter#presentFile(java.io.File)
+	 */
+	@Override
+	public byte[] presentFile(File file) {
+		return present(FileHelper.readFile(file, StandardCharsets.UTF_8)).getBytes();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see fr.tbr.doc.presentation.Presenter#getExtension()
+	 */
+	@Override
+	public String getTargetExtension() {
+		return "html";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see fr.tbr.doc.presentation.Presenter#getSourceExtension()
+	 */
+	@Override
+	public String getSourceExtension() {
+		return "html";
 	}
 
 }

@@ -20,6 +20,13 @@
 		<mylyn.version>2.7.0-SNAPSHOT</mylyn.version>
 	</properties>
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.xhtmlrenderer/flying-saucer-pdf-openpdf -->
+		<dependency>
+			<groupId>org.xhtmlrenderer</groupId>
+			<artifactId>flying-saucer-pdf-openpdf</artifactId>
+			<version>9.1.12</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.eclipse.mylyn.docs</groupId>
 			<artifactId>org.eclipse.mylyn.wikitext.asciidoc.core</artifactId>
@@ -70,6 +77,7 @@
 			<artifactId>org.eclipse.mylyn.wikitext.twiki.core</artifactId>
 			<version>${mylyn.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>

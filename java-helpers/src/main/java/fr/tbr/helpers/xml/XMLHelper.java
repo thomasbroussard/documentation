@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package fr.tbr.helpers.xml;
 
@@ -30,52 +30,59 @@ import org.w3c.dom.NodeList;
  */
 public class XMLHelper {
 
-	private static final Logger LOGGER = LogManager.getLogger(XMLHelper.class); 
-	
-	
+	private static final Logger LOGGER = LogManager.getLogger(XMLHelper.class);
+
+
 	public static List<Element> getElementsFromNodeList(NodeList nodeList){
-		List<Element> elements = new ArrayList<>();
+		final List<Element> elements = new ArrayList<>();
 		for (int i = 0; i < nodeList.getLength() ; i++){
-			Node item = nodeList.item(i);
+			final Node item = nodeList.item(i);
 			if (item instanceof Element){
 				elements.add((Element) item);
 			}
 		}
 		return elements;
 	}
-	
+
 	public static String documentToString(Document document){
-		TransformerFactory tf = TransformerFactory.newInstance();
+		return documentToString(document, "xml");
+	}
+
+	public static String documentToString(Document document, String method) {
+		final TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer transformer;
 		try {
 			transformer = tf.newTransformer();
-			StringWriter writer = new StringWriter();
-			//transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			final StringWriter writer = new StringWriter();
+			// transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-//			transformer.setOutputProperty(OutputKeys.CDATA_SECTION_ELEMENTS, "script");
-			//transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			transformer.setOutputProperty(OutputKeys.METHOD, method);
+			transformer.setOutputProperty(OutputKeys.CDATA_SECTION_ELEMENTS, "script");
+			transformer.setOutputProperty(OutputKeys.CDATA_SECTION_ELEMENTS, "style");
+			// transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount",
+			// "2");
 			transformer.transform(new DOMSource(document), new StreamResult(writer));
 			return writer.getBuffer().toString();
-		} catch (TransformerException e) {
+		} catch (final TransformerException e) {
 			LOGGER.error("error while transforming the output", e);
 		}
 		return "";
 	}
-	
-	
+
+
 	public static List<Element> runXpathOnDocument(String xpathExpr, Document document){
-		XPathFactory xpathFactory = XPathFactory.newInstance();
+		final XPathFactory xpathFactory = XPathFactory.newInstance();
 		javax.xml.xpath.XPathExpression expr;
 		try {
 			expr = xpathFactory.newXPath().compile(xpathExpr);
-			Object xpathEval = expr.evaluate(document, XPathConstants.NODESET);
-			return getElementsFromNodeList((NodeList) xpathEval); 
-		} catch (XPathExpressionException e) {
+			final Object xpathEval = expr.evaluate(document, XPathConstants.NODESET);
+			return getElementsFromNodeList((NodeList) xpathEval);
+		} catch (final XPathExpressionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		return new ArrayList<Element>();
+
+		return new ArrayList<>();
 	}
-		
+
 }

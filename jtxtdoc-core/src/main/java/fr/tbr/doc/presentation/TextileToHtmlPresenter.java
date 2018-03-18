@@ -4,6 +4,7 @@
 package fr.tbr.doc.presentation;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,24 +16,34 @@ import fr.tbr.doc.textile.TextileToHtml;
  * @author tbrou
  *
  */
-public class TextilePresenter implements Presenter {
+public class TextileToHtmlPresenter implements Presenter {
 
-	private static final Logger LOGGER = LogManager.getLogger(TextilePresenter.class);
+	private static final Logger LOGGER = LogManager.getLogger(TextileToHtmlPresenter.class);
 
 
 	private final TextileToHtml parser = new TextileToHtml();
 	private final HtmlPresenter presenter = new HtmlPresenter();
 
 	@Override
-	public String presentFile(File file){
+	public byte[] presentFile(File file) {
 		final Date beginDate = new Date();
 		LOGGER.debug("beginning transformation from file");
 		final String html = parser.parse(file);
 
 		final String formattedHtml = presenter.present(html);
 		LOGGER.debug("transformation achieved, took : {} ms", new Date().getTime() - beginDate.getTime());
-		return formattedHtml;
+		return formattedHtml.getBytes(StandardCharsets.UTF_8);
 
+	}
+
+	@Override
+	public String getTargetExtension() {
+		return "html";
+	}
+
+	@Override
+	public String getSourceExtension() {
+		return "textile";
 	}
 
 }
