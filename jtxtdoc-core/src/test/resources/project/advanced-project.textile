@@ -1,0 +1,96 @@
+h1. Advanced Java project : Quiz Manager
+
+h2. Introduction
+
+This project is made to provide an evaluation of the advanced java course.
+The goal of this project is to develop a program (API oriented, Web-based) that helps in dealing with quiz assessments.
+The usual problem while preparing an evaluation, is to :
+
+* Constitute an appropriate evaluation regarding of the required level
+* Reuse former questions
+* Organize sample evaluations
+* Correct automatically the MCQ questions.
+
+h2. Specifications
+
+
+bc.. @startuml
+class Question{
+  - String question
+  
+}
+
+class Exam{
+  - String title
+}
+
+class MCQChoice{
+   - String choice
+   - boolean valid
+}
+
+class MCQAnswer{
+  
+}
+
+class Student{
+  - String name
+  - String id
+}
+
+MCQAnswer *-- Exam
+Answer *-- Student
+Answer *-- Exam
+
+MCQAnswer *-- MCQChoice
+Student --* MCQAnswer
+
+
+Answer *-- Question
+
+MCQChoice *-- Question
+@enduml
+
+p. 
+
+
+h3. Types of question
+
+To handle the most of the possible cases, there are several types of question to consider.
+
+h4. The MCQ questions
+
+The MCQ questions are composed of a question text and a set of possible choices, each choice can be right or wrong.
+It can also be interesting to add a extra content, like some code extract, some picture or some other kind of media (video, music etc.).
+
+h4. The Open Questions
+
+The open questions are composed only by a question, and some hints, additionaly they can be completed by a exta media content.
+
+h4. Associative questions
+
+The associative questions are questions where it necessary to assign some propositions to some descriptions, like in the following.
+
+h4. Common questions attributes
+
+Each question has a some extra attribute to describe the topic and the difficulty of the question. Those two fields help to balance the overall exam complexity, and the topics coverage.
+Those attributes can be taken in account for automatic exam assembly.
+
+
+
+h3. Assessments
+
+An assessment is composed of several questions (see previous section). The exam is composed of answers given for questions and for a given person.
+
+h3. Results Analysis
+
+
+
+h2. Realization
+
+The produced application should be a web application. The usage of a Service Oriented Architecture (API-based) is mandatory.
+Three main features are expected.
+
+h3. Quiz editing
+
+The quiz editing part aims at providing user interface to create exams, create questions.

@@ -14,6 +14,7 @@ import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.tbr.doc.parsing.Parser;
 import fr.tbr.doc.presentation.Presenter;
 import fr.tbr.helpers.file.FileHelper;
 
@@ -23,6 +24,11 @@ import fr.tbr.helpers.file.FileHelper;
  */
 public class DocumentationSourceProcessor {
 
+	/**
+	 *
+	 */
+	private static final String METADATA_JSON = "/metadata.json";
+
 	private static final Logger LOGGER = LogManager.getLogger(DocumentationSourceProcessor.class);
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -30,9 +36,14 @@ public class DocumentationSourceProcessor {
 	private final File baseDirectory;
 	private final File targetDir;
 
+	private Presenter presenter;
+	private Parser parser;
+
 	private boolean force;
 
 	private boolean processBreadCrumbs;
+
+	private String[] sourceExtension;
 
 	/**
 	 * @param targetDir2
@@ -43,7 +54,7 @@ public class DocumentationSourceProcessor {
 		this.targetDir = targetDir;
 	}
 
-	public void process(Presenter presenter, boolean force) throws IOException {
+	public void process() throws IOException {
 
 		scanForDocumentation(presenter, targetDir, baseDirectory, baseDirectory, force);
 	}
@@ -63,10 +74,6 @@ public class DocumentationSourceProcessor {
 		}
 		for (final File currentSubDir : subDirs) {
 			scanForDocumentation(presenter, targetDir, baseDirectory, currentSubDir, force);
-			final String targetFilePath = targetDir.getAbsolutePath() + File.separator
-					+ FileHelper.getRelativePathExt(baseDirectory, currentSubDir);
-			// Files.move(currentSubDir.toPath(), new File(targetFilePath).toPath(),
-			// StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 
@@ -86,8 +93,8 @@ public class DocumentationSourceProcessor {
 		}
 
 		Files.copy(file.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		final String metadataOrig = file.getParentFile().toString() + "/metadata.json";
-		final String metadataDest = targetFile.getParentFile().toString() + "/metadata.json";
+		final String metadataOrig = file.getParentFile().toString() + METADATA_JSON;
+		final String metadataDest = targetFile.getParentFile().toString() + METADATA_JSON;
 
 		final File metadataFile = new File(metadataOrig);
 		if (metadataFile.exists()) {
@@ -98,24 +105,28 @@ public class DocumentationSourceProcessor {
 			if (processBreadCrumbs) {
 				processBreadCrumbs(targetFile, targetDir);
 			}
+			final String calculateMD5asHexadecimal = FileHelper.calculateMD5asHexadecimal(targetFile);
 			if (targetFile.exists()) {
 				final String md5Content = FileHelper.readFile(
 						new File(targetFilePath.replaceAll(presenter.getSourceExtension(), ".md5")),
 						StandardCharsets.UTF_8);
-				if (md5Content != null && !force) {
-					if (md5Content.equals(FileHelper.calculateMD5asHexadecimal(targetFile))) {
-						LOGGER.info("skipping file {}, no modification since last construction", targetFilePath);
-						return targetFilePath;
-					}
+				final boolean noChange = calculateMD5asHexadecimal.equals(md5Content);
+				if (md5Content != null && !force && noChange) {
+					LOGGER.info("skipping file {}, no modification since last construction", targetFilePath);
+					return targetFilePath;
 				}
 			}
-			targetFilePath = targetFilePath.replaceAll(presenter.getSourceExtension(), presenter.getTargetExtension());
+			for (final String ext : sourceExtension) {
+				targetFilePath = targetFilePath.replaceAll("\\." + ext, "." + presenter.getTargetExtension());
+
+			}
 			LOGGER.debug(targetFilePath);
-			final byte[] presentedFile = presenter.presentFile(targetFile);
+			final String rawContent = parser.parse(targetFile);
+			final byte[] presentedFile = presenter.presentContent(rawContent);
 
 			FileHelper.writeToFile(targetFilePath, presentedFile);
-			FileHelper.writeToFile(targetFilePath.replaceAll(presenter.getTargetExtension(), ".md5"),
-					FileHelper.calculateMD5asHexadecimal(targetFile));
+			FileHelper.writeToFile(targetFilePath.replaceAll(presenter.getTargetExtension(), "md5"),
+					calculateMD5asHexadecimal);
 
 		}
 		return targetFilePath;
@@ -129,7 +140,7 @@ public class DocumentationSourceProcessor {
 	private void processInclusions(File file, String targetFilePath) throws IOException {
 		final String beforeTransformationContent = FileHelper.readFile(new File(targetFilePath),
 				StandardCharsets.UTF_8);
-		String replacedContent = "";
+		final StringBuilder replacedContent = new StringBuilder();
 		if (beforeTransformationContent.contains("!include=")) {
 			// include detected
 			final Scanner scanner = new Scanner(beforeTransformationContent);
@@ -137,7 +148,8 @@ public class DocumentationSourceProcessor {
 				final String line = scanner.nextLine();
 				final String[] split = line.split("\\!include=");
 				if (split.length == 1) {
-					replacedContent += line + LINE_SEPARATOR;
+					replacedContent.append(line);
+					replacedContent.append(LINE_SEPARATOR);
 					continue;
 				}
 				final String includeFilePath = split[1];
@@ -145,10 +157,10 @@ public class DocumentationSourceProcessor {
 						+ includeFilePath;
 				final File relativeInclude = new File(relativeIncludePath);
 				final String includedContent = FileHelper.readFile(relativeInclude, StandardCharsets.UTF_8);
-				replacedContent += includedContent;
+				replacedContent.append(includedContent);
 			}
 			scanner.close();
-			FileHelper.writeToFile(targetFilePath, replacedContent);
+			FileHelper.writeToFile(targetFilePath, replacedContent.toString());
 		}
 	}
 
@@ -162,31 +174,26 @@ public class DocumentationSourceProcessor {
 
 		final String substract = file.toURI().toString().substring(basePath.toURI().toString().length());
 		final String[] fileParts = substract.split("/");
-		;
 
-		String breadCrumb = "p(breadcrumb). ";
+		final StringBuilder breadCrumb = new StringBuilder("p(breadcrumb). ");
 		int i = 0;
 
-		String absolutePath = basePath.getPath();
-		String currentPart = absolutePath;
+		final StringBuilder absolutePath = new StringBuilder(basePath.getPath());
+		String currentPart = "";
 		while (i < fileParts.length - 1) {
-			absolutePath += "/" + fileParts[i];
+			absolutePath.append("/" + fileParts[i]);
 			currentPart = fileParts[i];
-			String relativePath = "";
+			final StringBuilder relativePath = new StringBuilder();
 			DocumentMetadata meta;
-			meta = getMetaData(fileParts[i], absolutePath);
+			meta = getMetaData(fileParts[i], absolutePath.toString());
 			for (int j = 0; j < fileParts.length - 1 - i; j++) {
-				relativePath += "../";
+				relativePath.append("../");
 			}
 			if (meta.isActive()) {
-				breadCrumb += "\"" + meta.getDocumentName() + "\":" + relativePath + currentPart + " > ";
+				breadCrumb.append("\"" + meta.getDocumentName() + "\":" + relativePath + currentPart + " > ");
 			} else {
-				breadCrumb += meta.getDocumentName() + " > ";
+				breadCrumb.append(meta.getDocumentName() + " > ");
 			}
-
-
-
-
 
 			i++;
 		}
@@ -197,7 +204,9 @@ public class DocumentationSourceProcessor {
 		if (files != null) {
 			displayedFileName = files.get(filePart);
 		}
-		breadCrumb += displayedFileName == null ? filePart.split("\\.")[0] : displayedFileName;
+		if (filePart != null) {
+			breadCrumb.append(displayedFileName == null ? filePart.split("\\.")[0] : displayedFileName);
+		}
 		beforeTransformationContent += LINE_SEPARATOR + breadCrumb;
 		FileHelper.writeToFile(file.getAbsolutePath(), beforeTransformationContent);
 
@@ -231,7 +240,7 @@ public class DocumentationSourceProcessor {
 	 */
 	private DocumentMetadata getMetaData(String filePart, String absolutePath) {
 		DocumentMetadata meta;
-		final File metadataFile = new File(absolutePath + "/metadata.json");
+		final File metadataFile = new File(absolutePath + METADATA_JSON);
 		if (!metadataFile.exists()) {
 			meta = new DocumentMetadata();
 			meta.setDocumentName(filePart);
@@ -269,6 +278,96 @@ public class DocumentationSourceProcessor {
 	 */
 	public void setForce(boolean force) {
 		this.force = force;
+	}
+
+	/**
+	 * <h3>Description</h3>
+	 * <p>
+	 * This methods allows to ...
+	 * </p>
+	 *
+	 * <h3>Usage</h3>
+	 * <p>
+	 * It should be used as follows :
+	 *
+	 * <pre>
+	 * <code> ${enclosing_type} sample;
+	 *
+	 * //...
+	 *
+	 * sample.${enclosing_method}();
+	 *</code>
+	 * </pre>
+	 * </p>
+	 *
+	 * @since $${version}
+	 * @see Voir aussi $${link}
+	 * @author ${user}
+	 *
+	 *         ${tags}
+	 */
+	public void setParser(Parser parser) {
+		this.parser = parser;
+	}
+
+	/**
+	 * <h3>Description</h3>
+	 * <p>
+	 * This methods allows to ...
+	 * </p>
+	 *
+	 * <h3>Usage</h3>
+	 * <p>
+	 * It should be used as follows :
+	 *
+	 * <pre>
+	 * <code> ${enclosing_type} sample;
+	 *
+	 * //...
+	 *
+	 * sample.${enclosing_method}();
+	 *</code>
+	 * </pre>
+	 * </p>
+	 *
+	 * @since $${version}
+	 * @see Voir aussi $${link}
+	 * @author ${user}
+	 *
+	 *         ${tags}
+	 */
+	public void setPresenter(Presenter presenter) {
+		this.presenter = presenter;
+	}
+
+	/**
+	 * <h3>Description</h3>
+	 * <p>
+	 * This methods allows to ...
+	 * </p>
+	 *
+	 * <h3>Usage</h3>
+	 * <p>
+	 * It should be used as follows :
+	 *
+	 * <pre>
+	 * <code> ${enclosing_type} sample;
+	 *
+	 * //...
+	 *
+	 * sample.${enclosing_method}();
+	 *</code>
+	 * </pre>
+	 * </p>
+	 *
+	 * @since $${version}
+	 * @see Voir aussi $${link}
+	 * @author ${user}
+	 *
+	 *         ${tags}
+	 */
+	public void setSourceExtensions(String... extensions) {
+		sourceExtension = extensions;
 	}
 
 }

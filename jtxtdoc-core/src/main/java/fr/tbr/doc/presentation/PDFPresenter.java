@@ -35,8 +35,8 @@ public class PDFPresenter extends HtmlPresenter {
 
 	public byte[] presentAsByte(String htmlSource) {
 		try {
-			final String result = super.present(htmlSource);
-			result.replaceAll("\"toc\"", "tocPDF");
+			String result = new String(super.presentContent(htmlSource), UTF8);
+			result = result.replaceAll("\"toc\"", "tocPDF");
 			final ITextRenderer renderer = new ITextRenderer();
 
 			renderer.setDocumentFromString(result);
@@ -45,12 +45,22 @@ public class PDFPresenter extends HtmlPresenter {
 			renderer.createPDF(baos);
 			return baos.toByteArray();
 		} catch (final Exception e) {
-
+			LOGGER.error("rendering failed", e);
 		}
 		return new byte[0];
 
 	}
 
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see fr.tbr.doc.presentation.HtmlPresenter#presentContent(java.lang.String)
+	 */
+	@Override
+	public byte[] presentContent(String htmlSource) {
+		return presentAsByte(htmlSource);
+	}
 
 	@Override
 	protected void generateToc(Document document) {

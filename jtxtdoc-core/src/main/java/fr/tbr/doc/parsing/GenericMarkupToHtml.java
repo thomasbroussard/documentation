@@ -3,7 +3,7 @@
  * Code application :
  * Composant :
  */
-package fr.tbr.doc.textile;
+package fr.tbr.doc.parsing;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -32,16 +32,21 @@ import fr.tbr.helpers.file.FileHelper;
  *
  * ${tags}
  */
-public class GenericTextToHtml {
+public class GenericMarkupToHtml implements Parser {
 
-	private static final Logger LOGGER = LogManager.getLogger(MarkdownToHtml.class);
+	private static final Logger LOGGER = LogManager.getLogger(GenericMarkupToHtml.class);
+	private final MarkupLanguage mkLanguage;
 
+	public GenericMarkupToHtml(MarkupLanguage mkLanguage) {
+		this.mkLanguage = mkLanguage;
+	}
 	/**
 	 *
 	 * @param wikiText
 	 * @return
 	 */
-	public String parse(String wikiText, MarkupLanguage mkLanguage) {
+	@Override
+	public String parse(String wikiText) {
 
 		final StringWriter writer = new StringWriter();
 		final HtmlDocumentBuilder builder = new HtmlDocumentBuilder(writer);
@@ -55,7 +60,8 @@ public class GenericTextToHtml {
 	 * @param wikiTextFile
 	 * @return
 	 */
-	public String parse(File wikiTextFile, MarkupLanguage mkLanguage) {
+	@Override
+	public String parse(File wikiTextFile) {
 
 		final StringWriter writer = new StringWriter();
 		final HtmlDocumentBuilder builder = new HtmlDocumentBuilder(writer);
@@ -72,5 +78,6 @@ public class GenericTextToHtml {
 		parser.parse(content);
 		return writer.toString();
 	}
+
 
 }

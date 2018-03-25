@@ -5,8 +5,10 @@ package fr.tbr.doc.transformer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -16,14 +18,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class DocumentMetadata {
 
+	private static final Logger LOGGER = LogManager.getLogger(DocumentMetadata.class);
+
 
 	private String documentName;
-	private DocumentMetadata parent;
-
-
-
-	private List<String> tags;
-	private DocumentMetadata children;
 	private Map<String, String> files;
 	private boolean active = true;
 
@@ -49,11 +47,9 @@ public class DocumentMetadata {
 	public static DocumentMetadata fromFile(File file) {
 		final ObjectMapper mapper = new ObjectMapper();
 		try {
-			final DocumentMetadata metadata = mapper.readValue(file, DocumentMetadata.class);
-			return metadata;
+			return mapper.readValue(file, DocumentMetadata.class);
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("error", e);
 		}
 		return null;
 	}
@@ -77,8 +73,7 @@ public class DocumentMetadata {
 		try {
 			mapper.writeValue(file, metadata);
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("error", e);
 		}
 	}
 
@@ -86,7 +81,7 @@ public class DocumentMetadata {
 	 *
 	 */
 	public DocumentMetadata() {
-		// TODO Auto-generated constructor stub
+		// default constructor
 	}
 
 	/**
@@ -97,7 +92,8 @@ public class DocumentMetadata {
 	}
 
 	/**
-	 * @param files the files to set
+	 * @param files
+	 *            the files to set
 	 */
 	public void setFiles(Map<String, String> files) {
 		this.files = files;
