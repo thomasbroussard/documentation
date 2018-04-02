@@ -35,7 +35,13 @@ function bindTOCToggle(){
            
            var distance = endLocation - startLocation;
            var distanceX = endXLocation - startXLocation ;
+           if(distance < 0){
+               var content = document.querySelector(".content");
+               distance = distance - content.offsetTop;
+               endLocation = endLocation - content.offsetTop;
+           }
            var increments = distance/(duration/16);
+           
            var incrementsX = distanceX/(duration /16)
            var stopAnimation;
            var stopAnimationX;

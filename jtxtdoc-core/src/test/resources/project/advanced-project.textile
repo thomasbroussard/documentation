@@ -2,8 +2,8 @@ h1. Advanced Java project : Quiz Manager
 
 h2. Introduction
 
-This project is made to provide an evaluation of the advanced java course.
-The goal of this project is to develop a program (API oriented, Web-based) that helps in dealing with quiz assessments.
+This project is made to provide an evaluation of the advanced java course The goal of this project is to develop a program (API oriented, Web-based) that helps in dealing with quiz assessments.
+
 The usual problem while preparing an evaluation, is to :
 
 * Constitute an appropriate evaluation regarding of the required level
