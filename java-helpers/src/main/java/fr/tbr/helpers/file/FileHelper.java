@@ -57,8 +57,8 @@ public class FileHelper {
 		try {
 			final byte[] encoded = Files.readAllBytes(file.toPath());
 			return new String(encoded, encoding);
-		} catch (final Exception e) {
-			LOGGER.warn("error while reading file" );
+		} catch (final IOException e) {
+			LOGGER.warn("error while reading file {}", e.getMessage());
 			LOGGER.trace("error", e);
 		}
 		return "";
@@ -106,7 +106,7 @@ public class FileHelper {
 
 	/**
 	 * Calculates an MD5 checkSum
-	 * 
+	 *
 	 * @param file
 	 * @return
 	 * @throws NoSuchAlgorithmException

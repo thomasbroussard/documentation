@@ -13,6 +13,7 @@ The usual problem while preparing an evaluation, is to :
 
 h2. Specifications
 
+p(imgTitleTop). test
 
 bc.. @startuml
 class Question{

@@ -36,10 +36,21 @@ public class TestTextile {
 		final File targetDir = new File(targetPath);
 		final File baseDir = new File(basePath);
 		final DocumentationSourceProcessor processor = new DocumentationSourceProcessor(targetDir, baseDir);
-		processor.setForce(true);
+		processor.setForce(false);
 		processor.setProcessBreadCrumbs(true);
-		processor.setParser(new GenericMarkupToHtml(new TextileLanguage()));
-		processor.setPresenter(new HtmlPresenter());
+		final GenericMarkupToHtml parser = new GenericMarkupToHtml(new TextileLanguage());
+		processor.setParser(parser);
+		final HtmlPresenter presenter = new HtmlPresenter();
+		presenter.addScriptFromContent(new File("src/test/resources/script.js"));
+		presenter.addScriptFromContent(new File("src/test/resources/highlight.min.js"));
+
+
+		presenter.addStyleFromContent(new File("src/test/resources/default.highlight.css"));
+		presenter.addStyleFromContent(new File("src/test/resources/jtxtdoc-global.css"));
+		presenter.addStyleFromContent(new File("src/test/resources/jtxtdoc-styles.css"));
+		presenter.addStyleFromUrl("style.css");
+		processor.setPresenter(presenter);
+
 		processor.setSourceExtensions("textile");
 		processor.process();
 	}

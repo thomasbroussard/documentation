@@ -3,15 +3,15 @@
  */
 package fr.tbr.doc.presentation;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -21,12 +21,12 @@ import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import fr.tbr.helpers.file.FileHelper;
 import fr.tbr.helpers.html.HTML_ENTITIES;
+import fr.tbr.helpers.xml.XHTMLWrapper;
 import fr.tbr.helpers.xml.XMLHelper;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
@@ -38,6 +38,10 @@ import net.sourceforge.plantuml.SourceStringReader;
  */
 public class HtmlPresenter implements Presenter {
 
+	/**
+	 *
+	 */
+	private static final String CLASS = "class";
 	/**
 	 *
 	 */
@@ -62,6 +66,12 @@ public class HtmlPresenter implements Presenter {
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final Logger LOGGER = LogManager.getLogger(HtmlPresenter.class);
 
+	private final Set<String> stylesheetUrls = new LinkedHashSet<>();
+	private final Set<String> stylesheetContents = new LinkedHashSet<>();
+	private final Set<String> scriptUrls = new LinkedHashSet<>();
+	private final Set<String> scriptContents = new LinkedHashSet<>();
+	protected XHTMLWrapper xhtml;
+
 	private enum Stylesheets {
 		RESOURCES("jtxtdoc-styles.css"), HIGHLIGHT("default.highlight.css"), CUSTOM("jtxtdoc-global.css");
 
@@ -78,52 +88,28 @@ public class HtmlPresenter implements Presenter {
 	@Override
 	public byte[] presentContent(String htmlSource) {
 
-		Document document = null;
-		try {
-			final InputStream is = new ByteArrayInputStream(htmlSource.getBytes(UTF8));
-			document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
-			final Element body = XMLHelper.runXpathOnDocument("//body", document).get(0);
-			final List<Element> bodyChildElements = XMLHelper.getElementsFromNodeList(body.getChildNodes());
-			final Element contentDiv = document.createElement("div");
-			contentDiv.setAttribute("class", "content");
-			for (final Element element : bodyChildElements) {
+		xhtml = new XHTMLWrapper(htmlSource);
+		final Element body = xhtml.getBody();
 
-				contentDiv.appendChild(body.removeChild(element));
+		final Element contentDiv = xhtml.createDiv(null, "content", "content");
+		XMLHelper.moveChildren(body, contentDiv);
 
-			}
-			final Element h1 = (Element) contentDiv.getElementsByTagName("h1").item(0);
+		final Element h1 = (Element) contentDiv.getElementsByTagName("h1").item(0);
+		final Element headDiv = xhtml.createDiv(body, "headDiv", "head");
+		final Element header = xhtml.createDiv(headDiv, "titleDiv", "title");
 
-			final Element headDiv = document.createElement("div");
-			headDiv.setAttribute("class", "head");
-			final Element header = document.createElement("div");
-			header.setAttribute("class", "title");
-			headDiv.appendChild(header);
-			body.appendChild(headDiv);
-			header.setTextContent(h1.getTextContent());
-			body.appendChild(contentDiv);
-			contentDiv.removeChild(h1);
-			generateToc(document);
-			importScripts(document);
-			importStyleSheets(document);
-			drawDiagrams(document);
-		} catch (ParserConfigurationException | SAXException | IOException ignored) {
-			LOGGER.error("error while generating the presentation", ignored);
-		}
-		if (document == null) {
-			return "".getBytes();
-		}
-		String string = XMLHelper.documentToString(document, "xhtml");
-		// protect script and style cdata sections
-		string = string.replaceAll("\\<\\!\\[CDATA\\[", "/*<![CDATA[*/");
-		string = string.replaceAll("\\]\\]\\>", "/*]]>*/");
+		header.setTextContent(h1.getTextContent());
+		body.appendChild(contentDiv);
+		contentDiv.removeChild(h1);
+		generateToc();
+		importScripts();
+		importStyleSheets();
+		drawDiagrams();
+
+		final String string = xhtml.toXhtmlString();
+
 
 		return string.getBytes(UTF8);
-
-	}
-
-	private void generateBreadCrumbs(Document document) {
-		final Element body = (Element) document.getElementsByTagName("body").item(0);
-		final Element firstBodyElement = (Element) body.getElementsByTagName("*").item(0);
 
 	}
 
@@ -133,16 +119,15 @@ public class HtmlPresenter implements Presenter {
 	 *
 	 * @param document
 	 */
-	protected void generateToc(Document document) {
+	protected void generateToc() {
 		int i2 = 0;
 		int i3 = 0;
 		int i4 = 0;
 		int i1 = 0;
 
-		final Element toc = document.createElement("div");
-		final NodeList nodeList = document.getElementsByTagName("*");
-		final int h1Size = document.getElementsByTagName("h1").getLength();
-		final List<Element> elements = XMLHelper.getElementsFromNodeList(nodeList);
+		final Element toc = xhtml.createDiv(null, "toc", "toc");
+		final int h1Size = xhtml.getElementsByTagName("h1").size();
+		final List<Element> elements = xhtml.getAllElements();
 		Element titleElement = null;
 		for (final Element element : elements) {
 			final String tagName = element.getTagName();
@@ -197,54 +182,35 @@ public class HtmlPresenter implements Presenter {
 			}
 			final String refId = "section-" + section;
 			element.setAttribute("id", refId);
-			final Element holder = document.createElement(HTML_ENTITIES.DIV.getEntity());
-			holder.setAttribute("class", className);
-			final Element anchor = document.createElement(HTML_ENTITIES.A.getEntity());
-			String formattedSection = section.replaceAll("\\-", ".") + " .";
+			final Element holder = xhtml.createDiv(toc, "menuHolder");
+			holder.setAttribute(CLASS, className);
+
+			String formattedSection = section.replaceAll("\\-", ".") + ". ";
 			if (h1Size == 1 && HTML_ENTITIES.H1.getEntity().equals(tagName)) {
 				formattedSection = "";
 			}
-			anchor.setTextContent(formattedSection + element.getTextContent());
-			anchor.setAttribute("href", "#" + refId);
-			anchor.setAttribute("class", "scroll");
-			toc.appendChild(holder).appendChild(anchor);
+			xhtml.createAnchor(holder, "anchor-" + refId, "#" +refId,
+					formattedSection + element.getTextContent(), "scroll");
+
 		}
 
-		toc.setAttribute("id", "toc");
-		final Node content = getContentNode(document);
-		final Element title = document.createElement("title");
+
 		if (titleElement != null) {
-			title.setTextContent(titleElement.getTextContent());
+			xhtml.createTitle(titleElement.getTextContent());
 		}
-
-		final Node head = document.getElementsByTagName(HTML_ENTITIES.HEAD.getEntity()).item(0);
-		head.appendChild(title);
+		final Element content = getContentNode(xhtml.getDocument());
 		if (i1 <= 1) {
-			final Element contentElement = (Element) content;
-			contentElement.setAttribute("class", contentElement.getAttribute("class") + " singleTitle");
+			content.setAttribute(CLASS, content.getAttribute(CLASS) + " singleTitle");
 		}
 		content.insertBefore(toc, titleElement);
 	}
 
 	/**
 	 * <h3>Description</h3>
-	 * <p>This methods allows to ...</p>
-	 *
-	 * <h3>Usage</h3>
-	 * <p>It should be used as follows :
-	 *
-	 * <pre><code> ${enclosing_type} sample;
-	 *
-	 * //...
-	 *
-	 * sample.${enclosing_method}();
-	 *</code></pre>
+	 * <p>
+	 * This methods allows to get the "content" element, the one which contains all
+	 * the presentation
 	 * </p>
-	 *
-	 * @since $${version}
-	 * @see Voir aussi $${link}
-	 * @author ${user}
-	 *
 	 * ${tags}
 	 */
 	private Element getContentNode(Document document) {
@@ -252,62 +218,56 @@ public class HtmlPresenter implements Presenter {
 	}
 
 	/**
-	 * @param document
 	 */
-	private void importStyleSheets(Document document) {
-		final Node head = document.getElementsByTagName(HTML_ENTITIES.HEAD.getEntity()).item(0);
-
+	private void importStyleSheets() {
 		final StringBuilder styleContent = new StringBuilder();
-		for (final Stylesheets stylesheet : Stylesheets.values()) {
-			String string = FileHelper.readFile(new File(stylesheet.resource), UTF8);
-			if (string == null || "".equals(string)) {
-				string = FileHelper.readFileFromClasspath(HtmlPresenter.class, "/" + stylesheet.resource, UTF8);
+		// no configured content, fall back to default
+		if (stylesheetContents.isEmpty() && stylesheetUrls.isEmpty()) {
+			for (final Stylesheets stylesheet : Stylesheets.values()) {
+				String string = FileHelper.readFile(new File(stylesheet.resource), UTF8);
+				if (string == null || "".equals(string)) {
+					string = FileHelper.readFileFromClasspath(HtmlPresenter.class, "/" + stylesheet.resource, UTF8);
+				}
+				styleContent.append(LINE_SEPARATOR);
+				styleContent.append(string);
 			}
-			styleContent.append(LINE_SEPARATOR);
-			styleContent.append(string);
+		} else {
+			for (final String stylesheet : stylesheetContents) {
+				styleContent.append(stylesheet);
+				styleContent.append(LINE_SEPARATOR);
+			}
+			for (final String stylesheetUrl : stylesheetUrls) {
+				xhtml.createCssLink(stylesheetUrl);
+			}
 		}
-		importContent(document, head, styleContent.toString(), HTML_ENTITIES.STYLE.getEntity());
+		xhtml.addInlineStyle(styleContent.toString());
 
 	}
 
-	/**
-	 * @param document
-	 * @param target
-	 * @param content,
-	 *            String type
-	 */
-	private Element importContent(Document document, Node target, String content, String type) {
-		try {
-			final Document newDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-					.parse(new InputSource(new StringReader("<" + type + ">" + content + "</" + type + ">")));
-			final Element newElement = newDoc.getDocumentElement();
-			final Node importedNode = document.importNode(newElement, true);
-			target.appendChild(importedNode);
-			return (Element) importedNode;
-		} catch (SAXException | IOException | ParserConfigurationException e) {
-			LOGGER.error("error occured while importing content", e);
+	private void importScripts() {
+		final StringBuilder scriptContent = new StringBuilder();
+		// no configured content, fall back to default
+		if (scriptContents.isEmpty() && scriptUrls.isEmpty()) {
+			scriptContent.append(LINE_SEPARATOR);
+			scriptContent.append(FileHelper.readFileFromClasspath(HtmlPresenter.class, "/script.js", UTF8));
+			scriptContent.append(LINE_SEPARATOR);
+
+		} else {
+			for (final String script : scriptContents) {
+				scriptContent.append(script);
+				scriptContent.append(LINE_SEPARATOR);
+			}
+			for (final String stylesheetUrl : scriptUrls) {
+				xhtml.createScriptFromUrl(stylesheetUrl);
+			}
 		}
-		return null;
-	}
+		xhtml.createScriptFromContent(scriptContent.toString());
 
-	/**
-	 * @param document
-	 */
-	private void importScripts(Document document) {
-		final Node body = document.getElementsByTagName("body").item(0);
-		final Element script = document.createElement("script");
-		script.setAttribute("src", "http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js");
-		script.setAttribute("type", "text/javascript");
-		script.setTextContent(" ");
-		body.appendChild(script);
-		final String content = "<![CDATA[ " + LINE_SEPARATOR
-				+ FileHelper.readFileFromClasspath(HtmlPresenter.class, "/script.js", UTF8) + LINE_SEPARATOR + "]]>";
-		importContent(document, body, content, HTML_ENTITIES.SCRIPT.getEntity());
 	}
 
 
-	protected void drawDiagrams(Document document) {
-		final List<Element> codeBlocks = XMLHelper.getElementsFromNodeList(document.getElementsByTagName("code"));
+	protected void drawDiagrams() {
+		final List<Element> codeBlocks = xhtml.getElementsByTagName("code");
 		for (final Element element : codeBlocks) {
 			final String textContent = element.getTextContent();
 			if (textContent.startsWith("@startuml")) {
@@ -322,6 +282,7 @@ public class HtmlPresenter implements Presenter {
 					final Document newDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 							.parse(new InputSource(new StringReader(svg)));
 					final Element newElement = newDoc.getDocumentElement();
+					final Document document = xhtml.getDocument();
 					final Node importedNode = document.importNode(newElement, true);
 					final Node contentNode = getContentNode(document);
 					final Element object = document.createElement("object");
@@ -364,6 +325,32 @@ public class HtmlPresenter implements Presenter {
 	@Override
 	public String getSourceExtension() {
 		return "html";
+	}
+
+	public void addScriptFromContent(String content) {
+		scriptContents.add(content);
+	}
+
+	public void addScriptFromUrl(String resource) {
+		scriptUrls.add(resource);
+	}
+
+	public void addScriptFromContent(File contentFile) {
+		scriptContents
+		.add(FileHelper.readFile(contentFile, StandardCharsets.UTF_8));
+	}
+
+	public void addStyleFromContent(String content) {
+		stylesheetContents.add(content);
+	}
+
+	public void addStyleFromContent(File contentFile) {
+		stylesheetContents
+		.add(FileHelper.readFile(contentFile, StandardCharsets.UTF_8));
+	}
+
+	public void addStyleFromUrl(String resource) {
+		stylesheetUrls.add(resource);
 	}
 
 }

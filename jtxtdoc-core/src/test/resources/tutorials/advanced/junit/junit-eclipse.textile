@@ -24,7 +24,7 @@ h2. JUnit with Maven
 
 h3. What is JUnit?
 
-p. JUnit is a widely used open sourced framework used to implement unit testing in Java.
+p. JUnit is a widely used open source framework used to implement unit testing in Java.
 
 
 h3. What is Maven?
