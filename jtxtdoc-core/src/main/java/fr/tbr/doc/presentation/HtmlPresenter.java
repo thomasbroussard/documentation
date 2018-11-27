@@ -97,19 +97,69 @@ public class HtmlPresenter implements Presenter {
 		final Element h1 = (Element) contentDiv.getElementsByTagName("h1").item(0);
 		final Element headDiv = xhtml.createDiv(body, "headDiv", "head");
 		final Element header = xhtml.createDiv(headDiv, "titleDiv", "title");
+		if (h1 != null) {
+			final String textContent = h1.getTextContent();
+			header.setTextContent(textContent);
+			xhtml.createTitle(textContent);
+		}
 
-		header.setTextContent(h1.getTextContent());
 		body.appendChild(contentDiv);
 		contentDiv.removeChild(h1);
 		generateToc();
 		importScripts();
 		importStyleSheets();
 		drawDiagrams();
+		processImages();
 
 		final String string = xhtml.toXhtmlString();
 
 
 		return string.getBytes(UTF8);
+
+	}
+
+	/**
+	 * <h3>Description</h3>
+	 * <p>This methods allows to ...</p>
+	 *
+	 * <h3>Usage</h3>
+	 * <p>It should be used as follows :
+	 *
+	 * <pre><code> ${enclosing_type} sample;
+	 *
+	 * //...
+	 *
+	 * sample.${enclosing_method}();
+	 *</code></pre>
+	 * </p>
+	 *
+	 * @since $${version}
+	 * @see Voir aussi $${link}
+	 * @author ${user}
+	 *
+	 * ${tags}
+	 */
+	private void processImages() {
+		final List<Element> images = xhtml.getElementsByTagName("img");
+		for (final Element elt : images) {
+			final Document document = xhtml.getDocument();
+			final Element figure = document.createElement("figure");
+
+			final String title = elt.getAttribute("title");
+			final Element body = xhtml.getBody();
+			body.appendChild(figure);
+			elt.getParentNode().replaceChild(figure, elt);
+			figure.appendChild(elt);
+			if (title != null && !"".equals(title)) {
+				final Element caption = document.createElement("figcaption");
+				caption.setTextContent(title);
+				figure.appendChild(caption);
+			}
+
+
+
+
+		}
 
 	}
 
@@ -195,9 +245,7 @@ public class HtmlPresenter implements Presenter {
 		}
 
 
-		if (titleElement != null) {
-			xhtml.createTitle(titleElement.getTextContent());
-		}
+
 		final Element content = getContentNode(xhtml.getDocument());
 		if (i1 <= 1) {
 			content.setAttribute(CLASS, content.getAttribute(CLASS) + " singleTitle");
@@ -286,8 +334,20 @@ public class HtmlPresenter implements Presenter {
 					final Node importedNode = document.importNode(newElement, true);
 					final Node contentNode = getContentNode(document);
 					final Element object = document.createElement("object");
+					final String classes = ((Element) element.getParentNode()).getAttribute("class");
+					final Element figure = document.createElement("figure");
+					final Element body = xhtml.getBody();
+					body.appendChild(figure);
+					figure.appendChild(object);
+					if (classes != null && !classes.isEmpty()) {
+						final Element caption = document.createElement("figcaption");
+						caption.setTextContent(classes);
+						figure.appendChild(caption);
+					}
+
+
 					object.appendChild(importedNode);
-					contentNode.insertBefore(object, element.getParentNode());
+					contentNode.insertBefore(figure, element.getParentNode());
 					contentNode.removeChild(element.getParentNode());
 				} catch (final IOException | SAXException | ParserConfigurationException e) {
 					LOGGER.error("error", e);
@@ -318,8 +378,7 @@ public class HtmlPresenter implements Presenter {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 *
+	 * (non-Javadoc) !
 	 * @see fr.tbr.doc.presentation.Presenter#getSourceExtension()
 	 */
 	@Override

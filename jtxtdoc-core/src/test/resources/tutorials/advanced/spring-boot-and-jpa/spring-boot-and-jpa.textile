@@ -1,0 +1,171 @@
+h1(#jpa-implementation-with-spring-boot-and-spring-jpa-data-with-hibernate). JPA implementation with Spring Boot and Spring JPA DATA with Hibernate
+
+bq. This page has been fully written by 
+"Rubie de Oliveira":https://www.linkedin.com/in/rubie-de-oliveira-b98793139/ (Epita, AppingX-2020)
+"Romain Sauvaire":https://www.linkedin.com/in/romain-sauvaire-7a3209140 (Epita, AppingX-2020) 
+and validated by Thomas Broussard
+
+h2(#introduction). Introduction
+
+h3(#what-s-an-orm). What's an ORM ?
+
+An *ORM* (Object/Relational Mapping) is a technique that allows you to query and manipulate data from any database using an object-oriented language.
+ It greatest feature is that it allows you to handle your *database objects* as if it was simple *local objects*. You don't need to write complex SQL queries anymore!
+
+h3(#object-relational-impedance-mismatch). Object-Relational Impedance Mismatch
+
+Unfortunately, sometimes, it can happen that there is a mismatch between your relational object (in the database) and your object model (written in your favorite language).
+
+It can happens for multiple reasons :
+
+* _Granularity_ : There are a different number of classes and tables
+* _Inheritance_ : Not supported by all types of relation databases
+* _Identity_ : Problem of primary keys not being the same
+* _Association_ : In relation model, association are handled via foreign key. Meanwhile, in object oriented languages, associations are unidirectionnal reference
+* _Navigation_ : In object oriented languages, we use associations to navigate through the object network, while in relational model, data can be navigated through via queries joining tables
+
+h2(#jpa). JPA
+
+h3(#introduction2). Introduction
+
+JPA stands for : "*Java Persistence API*".
+ JPA is considered to be the *standard industry* approach for object to relational mapping (ORM).
+ JPA is, just as J2E, just a *specification*. It's just a set of interfaces which requires an implementation.
+
+h3(#persistence). Persistence ?
+
+For an object to be *persistent*, it has to lives on after the application is shut down.
+ In other words, it means the object has to be save in a database.
+
+h2(#spring-data-jpa). Spring Data JPA
+
+To illustrate the power of an ORM, we will use Spring implementation of JPA : _Spring Data JPA_
+
+h3(#tools-used). Tools used
+
+First of all, here's a list of all the tools we will use in this tutorial :
+
+* _A Java IDE_ : We will use Intellij IDEA here
+* _Maven_
+* _Spring Data JPA_
+* _MySQL database_
+
+h3(#setup). Setup
+
+We will first create a new maven project with Spring Data JPA and Spring boot.
+ To do it, we will use "Spring Initializr":https://start.spring.io/ here. (which is embedded in Intellij IDEA Ultimate Edition)
+
+<p align="center"> <img src="images/spring_init.png"/></p>
+
+h3(#entity). Entity
+
+Once our project is set up, we're going to create our first _entity_.
+ To do so, we're going to create a new package first, named _entities_, then a new Java class named _Moto_.
+ Then, have a look at this class :
+
+<p align="center"> <img src="images/moto_class.png"/></p>
+
+There is a lot of thing going on there! Let's have a look at them one by one:
+
+* *@Entity* : It's Spring Data JPA annotation to tell this class is an entity and need to persist.
+* *@Id* : Tells JPA that this attribute will be used as primary key in the Moto table.
+* *@GeneratedValue* : Indicate that the id should be _generated automatically_
+
+The other object's properties (brand, model, ...) are not annotated because we want them to be mapped to columns that share the same name.
+ We can also see that :
+
+* *2 constructors* have been created (without and with all arguments)
+* The *toString()* method have been overridden (this will be used later)
+
+h3(#repository). Repository
+
+Next thing we need is a *repository*. We can see it as the Java representation of the database table, with all its data in it!
+ We will use this repository to _insert_, _update_ and _remove_ from the database table.
+ Let's take a look at the interface, it's pretty simple :
+
+<p align="center"> <img src="images/moto_repository.png"/></p>
+
+First of all, well, it's an *interface*! Indeed, we don't need to create a class here. Thus, this interface needs to extends CrudRepository<T, ID>. In our case, our T is the Moto class, and its ID is simply a Long.
+ Next, we can see the annotation "*@Repository*" which tells Spring that this is our repository we will use for the Moto class. Finally, we can see *2 methods signatures*. We don't have to implements them, Spring Data JPA will understand easily what we want to do here.
+ But we have to give it a hint :
+
+* What does this query returns ? -> Here, a simple list
+* What do we want our Motos to have ? -> Here 2 cases : Either a brand, or a number of cylinders
+
+h3(#application). Application
+
+If you take a look at your source root directory, you should see a file named _'JpaTutorialApplication.java'_. It contains the main() method to launch your spring application.
+ We need to modify this class :
+
+<p align="center"> <img src="images/application.png"/></p>
+
+A lot of things are going on here! Let's explain them:
+
+* *@SpringBootApplication* : To simplify things, we use Spring Boot here.
+* *@Autowired* : Mark the attribute repository to be injected by Spring dependency injection facilities, which means this attribute will be injected just after the construction of the bean. We want this because we need the repository to be available as soon as possible.
+* *logger* : Spring uses a beautifully designed console logger, might as well use it, right ?
+* *CommandLineRunner* : As you can see, our class implements the functional interface CommandLineRunner. We use it here to be able to launch some code right after our spring application is started, before it shuts down.
+
+h3(#using-motorepository). Using MotoRepository
+
+Now that everything is set up, we can finally use our newly created repository!
+ Well, you must've guessed, we will code inside the run() function in our JpaTutorialApplication class.
+ First of all, we want to *add* some motorcycles to this repository. To do so, we will use the following code :
+
+<p align="center"> <img src="images/add_moto.png"/></p>
+
+Then, we want to *get* all Yamaha motorcycles :
+
+<p align="center"> <img src="images/get_yamaha.png"/></p>
+
+Let's check the logger :
+
+<p align="center"> <img src="images/logger.png"/></p>
+
+Everything is fine, we manage to print our motorcycles!
+
+h3(#persistence2). Persistence ?
+
+What about persistence here ?
+ If I launch my Spring application, the repository gets 2 new motorcycles, but nothing is persistent here, it gets deleted everytime the Spring application is shut down.
+ Right, we need to *connect our application to a database* then ! Let's use a simple MySQL database for this matter.
+ We won't go in details about how to set up MySQL here.
+
+bq.. From now on, every screenshot of the database will be taken from "DataGrip":https://www.jetbrains.com/datagrip/
+
+p. Once everything is set up, simply create a new database called _'jpatutorial'_. If everything went well, you should have something like that :
+
+<p align="center"> <img src="images/db_empty.png"/></p>
+
+Then, we have to tell our Spring application where this database is. To do so, we must edit the file *'src/resources/application.properties'* :
+
+<p align="center"> <img src="images/application_properties.png"/></p>
+
+spring.jpa.hibernate.ddl-auto : multiple possibilities here :
+
+* *none* : No changes to the database structure (default)
+* *update* : Database structure changes following our entities
+* *create* : Create the database everytime but does not drop it
+* *create-drop* : Create the database everytime and drop it when our Spring application is shut down
+
+Now, launch your Spring application and let your code add new motorcycles to the repository.
+ When the application shuts down, look at your database :
+
+<p align="center"> <img src="images/db_full_desc.png"/></p>
+
+2 new tables have been created :
+
+* *hibernate_sequence* : This table is used internally by Hibernate to generate the next ID of your table
+* *moto* : Our Java class we annotated with _@Entity_ is now a table in our database!
+
+Let's take a look inside this moto table :
+
+<p align="center"> <img src="images/db_full_table.png"/></p>
+
+And here we have the data we added in our code. That's it, we got our *data persistence*!
+
+h2(#credits). Credits
+
+Rubie DE OLIVEIRA (rubie.de-oliveira@epita.fr)
+ Romain SAUVAIRE--DASSAC (romain.sauvaire-dassac@epita.fr)
+

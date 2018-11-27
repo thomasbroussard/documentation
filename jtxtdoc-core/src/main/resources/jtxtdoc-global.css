@@ -2,6 +2,12 @@ html.compact {
 	background-color: white;
 }
 
+html {
+	font-size: 100% !important;
+}
+
+
+
 .compact body {
 	column-count: 2;
 	max-width: 100%;
@@ -51,6 +57,7 @@ div.content {
 
 body{
 	background-color: #eee;
+	font-size: 100% !important;
 }
 
 img {
@@ -237,7 +244,7 @@ h2.unnumbered:before, h3.unnumbered:before {
  */
 #toc div.lv2 {
 	padding-left: 0px;
-	font-size: 1.2em;
+	font-size: 1rem;
 }
 
 #toc div.lv1 {
@@ -251,7 +258,7 @@ h2.unnumbered:before, h3.unnumbered:before {
 
 #toc div.lv3 {
 	padding-left: 15px;
-	font-size: 1.1em;
+	font-size: 0.9rem;
 }
 
 #toc div.lv4 {
@@ -367,7 +374,7 @@ pre code {
 		margin-top: -50px;
 		margin-bottom: 60px;
 	}
-	blockquote p {
+/* 	blockquote p {
 		padding: 5px;
 		position: relative;
 		background: #fff;
@@ -394,5 +401,5 @@ pre code {
 		border-right-color: #0079c2;
 		border-width: 13px;
 		margin-top: -13px;
-	}
+	} */
 }

@@ -1,5 +1,15 @@
 eclipse.preferences.version=1
+encoding//src/test/java/fr/tbr/documentation/textile/tests/TestMD.java=ISO-8859-1
 encoding//src/test/java/fr/tbr/documentation/textile/tests/TestTextile.java=ISO-8859-1
 encoding//src/test/resources/PriseEnMain.textile=utf-8
+encoding//src/test/resources/generate-cert.textile=UTF-8
 encoding//src/test/resources/metadata.json=UTF-8
+encoding//src/test/resources/subdir/generate-cert.textile=UTF-8
+encoding//src/test/resources/subdir/tomcat-ssl.textile=UTF-8
 encoding//src/test/resources/tomcat-ssl.textile=UTF-8
+encoding//src/test/resources/tutorials/advanced/angular/angular-intro/angular-intro.markdown=utf-8
+encoding//src/test/resources/tutorials/advanced/angular/tutorial/basic-angular-tutorial.textile=utf-8
+encoding//src/test/resources/tutorials/advanced/jpa-dao/jpa-dao.html=UTF-8
+encoding//src/test/resources/tutorials/advanced/jpa-dao/jpa-dao.textile=utf-8
+encoding//src/test/resources/tutorials/advanced/spring-boot-and-jpa/spring-boot-and-jpa.textile=utf-8
+encoding//src/test/resources/tutorials/wepack/PriseEnMain.md=UTF-8

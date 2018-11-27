@@ -27,6 +27,11 @@ public class DocumentationSourceProcessor {
 	/**
 	 *
 	 */
+	private static final String MD5 = "md5";
+
+	/**
+	 *
+	 */
 	private static final String METADATA_JSON = "/metadata.json";
 
 	private static final Logger LOGGER = LogManager.getLogger(DocumentationSourceProcessor.class);
@@ -100,7 +105,8 @@ public class DocumentationSourceProcessor {
 		if (metadataFile.exists()) {
 			Files.copy(metadataFile.toPath(), new File(metadataDest).toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
-		if (file.getPath().endsWith(".textile")) {
+
+		if (file.getPath().endsWith(sourceExtension[0])) {
 			processInclusions(file, targetFilePath);
 			if (processBreadCrumbs) {
 				processBreadCrumbs(targetFile, targetDir);
@@ -125,7 +131,7 @@ public class DocumentationSourceProcessor {
 			final byte[] presentedFile = presenter.presentContent(rawContent);
 
 			FileHelper.writeToFile(targetFilePath, presentedFile);
-			FileHelper.writeToFile(targetFilePath.replaceAll(presenter.getTargetExtension(), "md5"),
+			FileHelper.writeToFile(targetFilePath.replaceAll(presenter.getTargetExtension(), MD5),
 					calculateMD5asHexadecimal);
 
 		}

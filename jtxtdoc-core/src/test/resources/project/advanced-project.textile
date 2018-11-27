@@ -13,7 +13,7 @@ The usual problem while preparing an evaluation, is to :
 
 h2. Specifications
 
-p(imgTitleTop). test
+p(imgTitleTop). UML Class Diagram
 
 bc.. @startuml
 class Question{
@@ -79,19 +79,33 @@ Those attributes can be taken in account for automatic exam assembly.
 
 
 
-h3. Assessments
-
-An assessment is composed of several questions (see previous section). The exam is composed of answers given for questions and for a given person.
-
-h3. Results Analysis
-
-
 
 h2. Realization
 
-The produced application should be a web application. The usage of a Service Oriented Architecture (API-based) is mandatory.
-Three main features are expected.
+The produced application should be a web application. The usage of a Service Oriented Architecture (API-based) is recommended.
+Two main features are expected: 
 
 h3. Quiz editing
 
-The quiz editing part aims at providing user interface to create exams, create questions.
+The quiz editing part aims at providing user interface to create questions, and organize them to form a quiz. 
+
+*For this project, only the Multiple Choices Questions are to be implemented.*
+
+
+h3. Quiz execution
+
+The quiz running part should run the quiz and get the answers from the user.
+All the answers should be recorded and at the end of the quiz the global result is displayed to the user.
+
+You can take an example on the following website :
+
+"Java Code Examples: Quiz":https://www.javacodeexamples.com/online-java-test-quiz  
+
+
+
+
+
+
+
+
+

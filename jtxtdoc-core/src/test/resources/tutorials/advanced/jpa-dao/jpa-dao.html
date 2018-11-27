@@ -1,0 +1,708 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	</head>
+	<body>
+		<h1 id="how-to-create-a-dao-using-jpa">How to create a DAO using JPA</h1>
+		<p>The purpose of this tutorial is to implement the DAO design pattern using Java and the JPA API.</p>
+		<p>All of the following code can be found in my public repository:</p>
+		<p>
+			<a href="https://bitbucket.org/BSpirit/dao-tutorial-core/src/master/">https://bitbucket.org/BSpirit/dao-tutorial-core/src/master/</a> 
+		</p>
+		<h2 id="project-set-up">Project Set up</h2>
+		<p>In this part, we are going to set up the Java project using Eclipse IDE and Apache Maven software.</p>
+		<h3 id="tools">Tools</h3>
+		<ul>
+			<li>
+				<strong>Eclipse IDE</strong>
+			</li>
+		</ul>
+		<p>Eclipse is a popular IDE used in Java programming.</p>
+		<p>
+			<a href="https://www.eclipse.org/downloads/">https://www.eclipse.org/downloads/</a>
+		</p>
+		<ul>
+			<li>
+				<strong>Maven</strong>
+			</li>
+		</ul>
+		<p>Apache Maven is a software project management and comprehension tool. Based on the concept of a Project Object Model (POM), Maven can manage a project&#8217;s build, reporting and documentation from a central piece of information.</p>
+		<p>Its main purpose for this tutorial will be to handle dependencies between librairies.</p>
+		<p>
+			<a href="https://maven.apache.org/">https://maven.apache.org/</a>
+		</p>
+		<h3 id="create-new-project">Create new project</h3>
+		<p>Open Eclipse IDE and create a new Maven Project: 
+			<code>File -&gt; New -&gt; Maven Project</code>
+		</p>
+		<ul>
+			<li>You may check 
+				<code>Create a simple project</code> option. This will create a basic, Maven-enabled Java project. If you require a more advanced setup, leave this setting unchecked, and you will be able to use more advanced Maven project setup features. Then, click 
+				<code>next</code>.
+			</li>
+			<li>Fill up new project informations, then click 
+				<code>finish</code>.
+			</li>
+		</ul>
+		<p>
+			<img alt="Project creation" title="Project creation" border="0" src="img/create-project.png"/> 
+		</p>
+		<ul>
+			<li>The structure of a Maven Based project is as follow:</li>
+		</ul>
+		<p>
+			<img alt="Project tree" title="Project tree" border="0" src="img/project-tree.png"/>
+		</p>
+		<h3 id="adding-dependencies">Adding dependencies</h3>
+		<p>The dependencies of the project can be found in the 
+			<code>pom.xml</code> file located at the root of the project. To begin with, we are going to add 
+			<code>Lombok</code> and 
+			<code>Hibernate</code> dependencies:
+		</p>
+		<ul>
+			<li>include lombok, add it to your 
+				<code>&lt;dependencies&gt;</code> block like so:
+			</li>
+		</ul>
+		<pre class="xml"><code class="xml">&lt;dependency&gt;
+&lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+&lt;artifactId&gt;lombok&lt;/artifactId&gt;
+&lt;version&gt;1.18.2&lt;/version&gt;
+&lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;
+</code></pre>
+		<ul>
+			<li>To include Hibernate, add it to your 
+				<code>&lt;dependencies&gt;</code> block like so:
+			</li>
+		</ul>
+		<pre class="xml"><code class="xml">&lt;dependency&gt;
+&lt;groupId&gt;org.hibernate&lt;/groupId&gt;
+&lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;
+&lt;version&gt;5.3.7.Final&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+		<ul>
+			<li>To force the project to compile using Java 8, you should also add this:</p></li>
+		</ul>
+		<pre class="xml"><code class="xml">&lt;properties&gt;
+&lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;
+&lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt;
+&lt;/properties&gt;
+</code></pre>
+		<ul>
+			<li>Your final 
+				<code>pom.xml</code> file should look like this:
+			</li>
+		</ul>
+		<pre class="xml"><code class="xml">&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt; 
+	&lt;groupId&gt;fr.epita.tutorial&lt;/groupId&gt; 
+	&lt;artifactId&gt;dao-tutorial-core&lt;/artifactId&gt; 
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt; 
+	&lt;name&gt;dao-tutorial-core&lt;/name&gt;
+	&lt;properties&gt; 
+	     &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;
+	     &lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt; 
+	&lt;/properties&gt;
+	&lt;dependencies&gt; 
+		&lt;dependency&gt; 
+		    &lt;groupId&gt;org.projectlombok&lt;/groupId&gt; 
+		    &lt;artifactId&gt;lombok&lt;/artifactId&gt; 
+		    &lt;version&gt;1.18.2&lt;/version&gt; 
+		    &lt;scope&gt;provided&lt;/scope&gt; 
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+		    &lt;groupId&gt;org.hibernate&lt;/groupId&gt;
+		    &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;
+		    &lt;version&gt;5.3.7.Final&lt;/version&gt;
+		&lt;/dependency&gt;
+	&lt;/dependencies&gt;
+&lt;/project&gt; 
+</code></pre>
+		<ul>
+			<li>Once the dependency is added, you must use 
+				<code>maven install</code> command to set the project. In eclipse, you can right click on the 
+				<code>pom.xml</code> file located at the root of the project and go to 
+				<code>Run As -&gt; Maven install</code>.
+			</li>
+		</ul>
+		<p>
+			<strong>NOTE</strong>: When adding new dependencies, you may right click on the root of the project and go to 
+			<code>Maven -&gt; Update Project</code> to get the new dependencies.
+		</p>
+		<h3 id="lombok-installation">Lombok installation</h3>
+		<ul>
+			<li>Once the jar was downloaded in your local repository, go to the jar location from command prompt. If you are not sure where to find it, the path is specified in Eclipse:</li>
+		</ul>
+		<p>
+			<img alt="Lombok Path" title="Lombok Path" border="0" src="img/lombok-path.png"/> 
+		</p>
+		<ul>
+			<li>Then use 
+				<code>java -jar lombok-1.18.2.jar</code> to pursue Lombok installation. You may have to restart Eclipse.
+			</li>
+		</ul>
+		<h2 id="entities">Entities</h2>
+		<p>Entities are POJO (Plain Old Java Object) class whose main purpose is to be mapped to relationnal database tables. In this part of the tutorial, we will use JPA API (thanks to Hibernate) and Lombok to easily create Entity classes.</p>
+		<h3 id="tools-1">Tools</h3>
+		<ul>
+			<li>
+				<strong>Project Lombok</strong>
+			</li>
+		</ul>
+		<p>Project Lombok is a java library that automatically plugs into your editor and build tools, spicing up your java.</p>
+		<p>
+			<a href="https://projectlombok.org/">https://projectlombok.org/</a>
+		</p>
+		<ul>
+			<li>
+				<strong>Hibernate</strong>
+			</li>
+		</ul>
+		<p>Java Persistence API purpose is to persistently store the vast amounts of data into a database. Using JPA, the burden of interacting with the database reduces significantly. It forms a bridge between object models (Java program) and relational models (database program).</p>
+		<p>In this tutorial, we will use Hibernate ORM, as it is also an implementation of the Java Persistence API (JPA) specification.</p>
+		<p>
+			<a href="http://hibernate.org/orm/">http://hibernate.org/orm/</a>
+		</p>
+		<h3 id="lets-write-some-code">Let&#8217;s write some code !</h3>
+		<p>To illustrate the DAO design pattern, we are first going to create two entities, an Author entity and a Book entity. Using 
+			<code>Javax.persistence</code> and 
+			<code>Lombok</code>, the code is very simple.
+		</p>
+		<ul>
+			<li>First, let&#8217;s create our Author class inside a 
+				<code>fr.epita.tutorial.datamodel</code> package. Right click on 
+				<code>src/main/java</code> and go to 
+				<code>new -&gt; Class</code>.
+			</li>
+		</ul>
+		<p>
+			<img alt="Author class" title="Author class" border="0" src="img/author-class.png"/>
+		</p>
+		<p>The code of the Author class is as simple as this !</p>
+		<pre class="java"><code class="java">@Entity
+@Data
+public class Author {
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long id;
+    private String firstName;
+    private String lastName;
+}
+</code></pre>
+		<p>The code of the Book class is as easy to write:</p>
+		<pre class="java"><code class="java">@Entity
+@Data
+public class Book {
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long id;
+</code></pre>		   private String title;   @ManyToOne
+		    private Author author;
+		}
+		<p>In these examples, several annotations are used to avoid writing redundant code:</p>
+		<ul>
+			<li>
+				<code>Data</code> is a Lombok annotation and allows auto generation of setters/getters and other utilities function such as 
+				<code>toString</code>, 
+				<code>hashCode</code> or 
+				<code>equals</code>
+			</li>
+			<li>
+				<code>Entity</code> is used to create the binding between our class and the DB table
+			</li>
+			<li>
+				<code>Id</code> is used to specify which attribut is used as an ID inside the DB table
+			</li>
+			<li>
+				<code>ManyToOne</code> is used to specify the relation between our Book class and our Author class (this will also impact the DB tables)
+			</li>
+		</ul>
+		<h2 id="dao">3. DAO</h2>
+		<p>The Data Access Object (DAO) pattern is a structural pattern that allows isolation of the application/business layer from the persistence layer (usually a relational database, but it could be any other persistence mechanism) using an abstract API.</p>
+		<p>The functionality of this API is to hide from the application all the complexities involved in performing CRUD operations in the underlying storage mechanism. This permits both layers to evolve separately without knowing anything about each other.</p>
+		<p>In this part of the tutorial, we will create simple DAOs allowing an easy access to our DB entities. We will also use dependency injection to help us instanciate the 
+			<code>DriverManagerDataSource</code> and the 
+			<code>SessionFactory</code> objects, which are both necessary to handle the DB connection.
+		</p>
+		<h3 id="tools-2">3.1. Tools</h3>
+		<ul>
+			<li>
+				<strong>Log4j</strong>
+			</li>
+		</ul>
+		<p>Apache Log4j is a Java-based logging utility. It can be used to help debugging the application if necessary. It can be added as a maven dependency by updating your 
+			<code>pom.xml</code> file:
+		</p>
+		<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.logging.log4j&lt;/groupId&gt;
+    &lt;artifactId&gt;log4j-api&lt;/artifactId&gt;
+    &lt;version&gt;2.11.1&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.logging.log4j&lt;/groupId&gt;
+    &lt;artifactId&gt;log4j-core&lt;/artifactId&gt;
+    &lt;version&gt;2.11.1&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+		<p>To use Log4j, you have to create a configuration file. Create a file called 
+			<code>log4j2.xml</code> in 
+			<code>src/test/resources/</code> and add this content:
+		</p>
+		<pre class="xml"><code class="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;Configuration status="WARN"&gt;
+  &lt;Appenders&gt;
+    &lt;Console name="Console" target="SYSTEM_OUT"&gt;
+      &lt;PatternLayout 
+        pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/&gt;
+    &lt;/Console&gt;
+  &lt;/Appenders&gt;
+  &lt;Loggers&gt;
+    &lt;Root level="info"&gt;
+      &lt;AppenderRef ref="Console"/&gt;
+    &lt;/Root&gt;
+  &lt;/Loggers&gt;
+&lt;/Configuration&gt;
+</code></pre>
+		<p>
+			<a href="https://logging.apache.org/log4j/2.x/">https://logging.apache.org/log4j/2.x/</a>
+		</p>
+		<ul>
+			<li>
+				<strong>Spring Framework</strong>
+			</li>
+		</ul>
+		<p>The Spring Framework is an application framework. In this part of the tutorial, it will be used for dependency injection using <tt>
+			<code>inject&lt;/tt&gt; annotation from @javax.injection</code>. These can be added as maven dependencies by updating your 
+			<code>pom.xml</code> file:
+		</p>
+		<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;javax.inject&lt;/groupId&gt;
+    &lt;artifactId&gt;javax.inject&lt;/artifactId&gt;
+    &lt;version&gt;1&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-test&lt;/artifactId&gt;
+    &lt;version&gt;5.0.9.RELEASE&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-core&lt;/artifactId&gt;
+    &lt;version&gt;5.0.9.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+    &lt;version&gt;5.0.9.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-orm&lt;/artifactId&gt;
+    &lt;version&gt;5.0.9.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+		<p>
+			<a href="https://spring.io/">https://spring.io/</a>
+		</p>
+		<h3 id="lets-write-some-code-1">Let&#8217;s write some code !</h3>
+		<ul>
+			<li>First, let&#8217;s create, inside a 
+				<code>fr.epita.tutorial.datamodel</code> package, a generic DAO able to perform basic CRUD operations. Right click on 
+				<code>src/main/java</code> and go to 
+				<code>new -&gt; Class</code>. The DAO code is as follow:
+			</li>
+		</ul>
+		<pre><code>public abstract class DAO&lt;T&gt; {
+
+protected static final Logger LOGGER = LogManager.getLogger(DAO.class);
+protected Class&lt;T&gt; modelClass;
+
+@Inject
+@Named("sessionFactory")
+private SessionFactory sf;
+
+public void setmodelClass(Class&lt;T&gt; modelClass) {
+    this.modelClass = modelClass;
+}
+
+protected final Session getSession() {
+    Session session = null;
+    try {
+        session = this.sf.getCurrentSession();
+    } catch (Exception e) {
+        LOGGER.error(e);
+    }
+
+    if (session == null)
+        session = sf.openSession();
+
+    return session;
+
+}
+
+protected final Transaction getTransaction(Session session) {
+    Transaction tx = session.getTransaction();
+    if (!TransactionStatus.ACTIVE.equals(tx.getStatus()))
+        tx = session.beginTransaction();
+
+    return tx;
+}
+
+public final Long create(T obj) {
+    Session session = this.getSession();
+    Transaction tx = this.getTransaction(session);
+    Long id = (Long) session.save(obj);
+    tx.commit();
+    return id;
+}
+
+public final void delete(T obj) {
+    Session session = this.getSession();
+    Transaction tx = this.getTransaction(session);
+    session.delete(obj);
+    tx.commit();
+}
+
+public final void update(T obj) {
+    Session session = this.getSession();
+    Transaction tx = this.getTransaction(session);
+    session.update(obj);
+    tx.commit();
+}
+
+public T getById(Long id) {
+    return getSession().get(modelClass, id);
+}
+
+@SuppressWarnings("unchecked")
+public List&lt;T&gt; getAll() {
+    return getSession().createQuery("from " + 
+        modelClass.getName()).list();
+}
+
+public abstract List&lt;T&gt; search(T criteria);
+}
+
+</code></pre>
+		<p></p>
+		<p>In the previous exemple:</p>
+		<ul>
+			<li>The 
+				<code>SessionFactory</code> object is used to create Sessions and Transactions with the DB. We will see later how to configure it.
+			</li>
+			<li>
+				<code>getSession</code> and 
+				<code>getTransaction</code> methods are used to avoid Sessions or Transactions duplication.
+			</li>
+			<li>
+				<code>create</code>, 
+				<code>update</code>, 
+				<code>update</code>, 
+				<code>getById</code> and 
+				<code>getAll</code> methods perform the basic CRUD actions. As you can, we don&#8217;t even need to know what the data looks like thanks to genericity.
+			</li>
+		</ul>
+		<p>Because this DAO class is abstract, it cannot be instantiated. Specific DAOs must be created for each entity and can be used to specify some behaviors, which might depends on the entity itself:</p>
+		<ul>
+			<li>
+				<strong>AuthorDAO</strong>:
+			</li>
+		</ul>
+		<pre><code>@Repository
+public class AuthorDAO extends DAO&lt;Author&gt; {
+
+public AuthorDAO() {
+    this.setmodelClass(Author.class);
+}
+
+@Override
+public List&lt;Author&gt; search(Author criteria) {
+    String searchQuery = "from Author as a " +
+        "where a.firstName like :firstName or " +
+        "a.lastName like :lastName";
+    Session session = this.getSession();
+    Query&lt;Author&gt; query = session.createQuery(searchQuery, Author.class);
+    query.setParameter("firstName", "%" + criteria.getFirstName() + "%");
+    query.setParameter("lastName", "%" + criteria.getLastName() + "%");
+    return query.list();
+}
+}
+</code></pre>
+		<p></p>
+		<ul>
+			<li>
+				<strong>BookDAO</strong>:
+			</li>
+		</ul>
+		<pre><code>@Repository
+public class BookDAO extends DAO&lt;Book&gt; {
+
+public BookDAO() {
+    this.setmodelClass(Book.class);
+}
+
+@Override
+public List&lt;Book&gt; search(Book criteria) {
+    String searchQuery = "from Book where author = :author";
+    Query&lt;Book&gt; query = getSession().createQuery(searchQuery, Book.class);
+    query.setParameter("question", criteria.getAuthor());
+    return query.list();
+}
+}
+</code></pre>
+		<p></p>
+		<p>In the previous examples:</p>
+		<ul>
+			<li>We use a create a query using HQL (Hibernate Query Language) and the 
+				<code>Query</code> object.
+			</li>
+			<li>We use 
+				<code>setParameter</code> to make a binding using the criteria variable.
+			</li>
+			<li>We return the result of the 
+				<code>Query</code> as a list.
+			</li>
+			<li>The <tt>@Repository</tt> annotation is needed by Spring Framework when creating a DAO class. For more details, check Spring Framework documentation.</li>
+		</ul>
+		<h3 id="use-dependency-injection">Use dependency injection</h3>
+		<p>The 
+			<code>BookDAO</code> and 
+			<code>AuthorDAO</code> are both using dependency injection to instantiate the 
+			<code>SessionFactory</code> object. As a result, these objects have to be managed by the Spring IoC container. These objects can be refered as &#171;beans&#187;. These beans are created with the configuration metadata supplied, for example using an XML file.
+		</p>
+		<p>Let&#8217;s create this XML file:</p>
+		<ul>
+			<li>Create a file called 
+				<code>applicationContext.xml</code> in 
+				<code>src/test/resources</code> and add this content inside:
+			</li>
+		</ul>
+		<pre><code>&lt;beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/mvc
+    http://www.springframework.org/schema/mvc/spring-mvc.xsd"&gt;
+    
+    &lt;context:component-scan 
+    base-package="fr.epita.tutorial.services.data"/&gt;
+
+    &lt;bean id="dataSource"
+    class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+        &lt;property 
+            name="url" 
+            value="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"&gt;
+        &lt;/property&gt;
+        &lt;property 
+            name="username" 
+            value="test"&gt;
+        &lt;/property&gt;
+        &lt;property 
+            name="password" 
+            value="test"&gt;
+        &lt;/property&gt;
+        &lt;property 
+            name="driverClassName" 
+            value="org.h2.Driver"&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="hibernateProperties"
+    class="org.springframework.beans.factory.config.PropertiesFactoryBean"&gt;
+        &lt;property name="properties"&gt;
+            &lt;props&gt;
+                &lt;prop key="hibernate.dialect"&gt;
+                  org.hibernate.dialect.H2Dialect
+                &lt;/prop&gt;
+                &lt;prop key="hibernate.show_sql"&gt;
+                  true
+                &lt;/prop&gt;
+                &lt;prop key="hibernate.hbm2ddl.auto"&gt;
+                  update
+                &lt;/prop&gt;
+                &lt;prop key="hibernate.connection.autocommit"&gt;
+                  false
+                &lt;/prop&gt;
+            &lt;/props&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="sessionFactory"
+    class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"&gt;
+        &lt;property 
+            name="dataSource" 
+            ref="dataSource" /&gt;
+        &lt;property 
+            name="hibernateProperties"
+            ref="hibernateProperties" /&gt;
+        &lt;property 
+            name="packagesToScan"&gt;
+            &lt;list&gt;
+                &lt;value&gt;fr.epita.tutorial.datamodel&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+
+&lt;/beans&gt;
+
+</code></pre>
+		<p></p>
+		<p>Let&#8217;s explain this configuration a little bit more:</p>
+		<ul>
+			<li>
+				<code>&lt;context:component-scan base-package="fr.epita.tutorial.services.data" /&gt;</code> is used to scan the given package in order to make the 
+				<code>BookDAO</code> and 
+				<code>AuthorDAO</code> classes recognizable as Beans and injected.
+			</li>
+			<li>
+				<code>&lt;bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"&gt;</code> is used to instantiate the 
+				<code>SessionFactory</code> object.
+			</li>
+			<li>This Bean need both 
+				<code>dataSource@and @hibernateProperties</code> to be instantiated.
+			</li>
+		</ul>
+		<h2 id="tests-with-junit">4. Tests with JUnit</h2>
+		<p>In this session, we are going to use JUnit to test some of the CRUD operations and demonstrate how dependency injection works.</p>
+		<h3 id="tools-3">4.1. Tools</h3>
+		<ul>
+			<li>
+				<strong>H2 Database</strong>
+			</li>
+		</ul>
+		<p>H2 is a relational database management system written in Java. It can be embedded in Java applications or run in the client-server mode. It will be used to store our data. It can be added as a maven dependency by updating your 
+			<code>pom.xml</code> file:
+		</p>
+		<pre class="xml"><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.h2database&lt;/groupId&gt;
+    &lt;artifactId&gt;h2&lt;/artifactId&gt;
+    &lt;version&gt;1.4.197&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+</code></pre>
+		<p>
+			<a href="http://www.h2database.com/html/main.html">http://www.h2database.com/html/main.html</a>
+		</p>
+		<ul>
+			<li>
+				<strong>JUnit</strong>
+			</li>
+		</ul>
+		<p>JUnit framework will be used for unit tests. It can be added as a maven dependency by updating your 
+			<code>pom.xml</code> file:
+		</p>
+		<p>
+			<a href="https://junit.org/junit4/">https://junit.org/junit4/</a>
+		</p>
+		<h2 id="lets-write-some-code-2">4.2. Let&#8217;s write some code !</h2>
+		<ul>
+			<li>Let&#8217;s create some tests inside a 
+				<code>fr.epita.tutorial.services.test</code> package. Right click on 
+				<code>src/test/java</code> and go to 
+				<code>new -&gt; Class</code>. The code is as follow:
+			</li>
+		</ul>
+		<pre><code>@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "/applicationContext.xml")
+public class TestJPA {
+
+private static final Logger LOGGER = LogManager.getLogger(TestJPA.class);
+
+@Inject
+AuthorDAO authorDAO;
+
+@Inject 
+BookDAO bookDAO;
+
+
+@Before
+public void addAuthor() {
+    Author author = new Author();
+    author.setFirstName("Philip");
+    author.setLastName("K. Dick");
+    authorDAO.create(author);
+}
+
+@Test
+public void testAuthorDAOCreateGetById() {
+
+    // Given
+    Author author = new Author();
+    author.setFirstName("Stephen");
+    author.setLastName("King");
+
+    // When
+    Long id = authorDAO.create(author);
+
+    // then
+    author = authorDAO.getById(id);
+    LOGGER.info(author);
+    Assert.assertEquals("Stephen", author.getFirstName());
+    Assert.assertEquals("King", author.getLastName());
+}
+
+@Test
+public void testAuthorDAOSearchUpdate() {
+
+    // Given
+    Author author = new Author();
+    author.setFirstName("Philip");
+    author = authorDAO.search(author).get(0);
+
+    // When
+    author.setFirstName("Howard");
+    author.setLastName("Lovecraft");
+    authorDAO.update(author);
+
+    // Then 
+    author = authorDAO.search(author).get(0);
+    LOGGER.info(author);
+    Assert.assertEquals("Howard", author.getFirstName());
+    Assert.assertEquals("Lovecraft", author.getLastName());
+}
+
+@Test
+public void testAuthorDAODeleteGetAll() {
+    // Given
+    List&lt;Author&gt; authors = authorDAO.getAll();
+
+    // When
+    for (Author author : authors)
+        authorDAO.delete(author);
+
+    // Then 
+    authors = authorDAO.getAll();
+    LOGGER.info(authors);
+    Assert.assertEquals(0, authors.size());
+}
+}
+</code></pre>
+		<p></p>
+		<p>In the previous example:</p>
+		<ul>
+			<li>Because we are using dependency injection, we have to specify the application context using:</li>
+		</ul>
+		<pre class="java"><code class="java">@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "/applicationContext.xml")
+</code></pre>
+		<ul>
+			<li>As you can see, <tt>
+				<code>Inject&lt;/tt&gt; annotation is used for dependency injection and allow the instantiation of @BookDAO</code>, 
+				<code>AuthorDAO</code> and their corresponding 
+				<code>SessionFactory</code> object.
+			</li>
+		</ul>
+	</body>
+</html>
