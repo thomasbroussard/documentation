@@ -1,4 +1,4 @@
-h1. Advanced Java project : Quiz Manager
+h1. Advanced Java project : Quiz Manager II 
 
 h2. Introduction
 
@@ -13,9 +13,7 @@ The usual problem while preparing an evaluation, is to :
 
 h2. Specifications
 
-p(imgTitleTop). UML Class Diagram
-
-bc.. @startuml
+bc(UML Class Diagram).. @startuml
 class Question{
   - String question
   

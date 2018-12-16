@@ -1,0 +1,8 @@
+{
+	"documentName": "projects",
+	"files": {
+		"fundamental-project.textile": "Fundamental Project",
+		"advanced-project.textile": "Advanced Project"
+	},
+	"active" :false
+}

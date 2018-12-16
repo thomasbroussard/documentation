@@ -1,0 +1,313 @@
+h1. Fundamental Java project : Quiz Manager 
+
+h2. Introduction
+
+This project is proposed to students in order to evaluate their skills for the fundamental period of Java Programming and UML.
+
+This goal is achieved through the realization of a console application (+ GUI as possible bonus), which aims at managing digital quiz preparation and execution.
+
+
+h2. Specifications
+
+The usual problem while preparing and running an evaluation, is to :
+
+* Constitute an appropriate evaluation corresponding of the required level
+* Reuse former questions
+* Organize sample evaluations
+* Correct automatically the MCQ questions.
+
+bc(UML Class Diagram).. @startuml
+class Question{
+  - String question
+  
+}
+
+class Exam{
+  - String title
+}
+
+class MCQChoice{
+   - String choice
+   - boolean valid
+}
+
+class MCQAnswer{
+  
+}
+
+class Student{
+  - String name
+  - String id
+}
+
+MCQAnswer o-- Exam
+Answer o-- Student
+Answer o-- Exam
+
+MCQAnswer o-- MCQChoice
+Student --o MCQAnswer
+
+
+Answer o-- Question
+
+MCQChoice o-- MCQQuestion
+
+MCQQuestion --|> Question
+
+
+
+@enduml
+
+p. 
+
+
+h3. Types of question
+
+To handle the most of the possible cases, there are several types of question to consider.
+* MCQ Questions
+* Open Questions
+* Associative Questions
+
+
+h4. The MCQ questions
+
+The MCQ questions are composed of a question text and a set of possible choices, each choice can be right or wrong.
+It can also be interesting to add a extra content, like some code extract, some picture or some other kind of media (video, music etc.).
+
+h4. The Open Questions
+
+The open questions are composed only by a question, and some hints, additionaly they can be completed by a exta media content.
+
+h4. Associative questions
+
+The associative questions are questions where it necessary to assign some propositions to some descriptions, like in the following.
+
+h4. Common questions attributes
+
+Each question has a some extra attributes to describe the **topic** (tag) and the **difficulty** of the question. Those two fields help to balance the overall exam complexity, and the topics coverage.
+Those attributes can be taken in account for automatic exam assembly.
+
+
+h2. Realization
+
+
+h3. Main features
+
+The produced application should be a console application. The scope that you should cover by this application is to :
+* be able to operate CRUD on Open Questions and MCQ Questions (questions and valid answers are stored in a **database** or an XML file or a JSON file)
+* be able to search questions based on topics
+* be able to assemble automatically a quiz (a quiz is a set of questions) that gathers all the questions covering a given list of topics.
+* export this quiz under a plain text format
+* run the evaluation and provide the automatic mark in the end of this execution
+
+
+h3. Bonus
+
+* Do the same using a desktop GUI (JavaFX is preferred)
+* Export a quiz as PDF
+* Write an algorithm (or use an existing one) that will allow to get quiz based on a complexity rate. This overall complexity required by the user can be calculated on the **difficulty** property.
+
+
+
+h3. Example of realization
+
+The quiz running part should run the quiz and get the answers from the user.
+All the answers should be recorded and at the end of the quiz the global result is displayed to the user.
+
+You can take an example on the following website :
+
+"Java Code Examples: Quiz":https://www.javacodeexamples.com/online-java-test-quiz  
+
+
+h2. Evaluation
+
+This application will be evaluated using the grid below:
+
+
+    <table class="table table-condensed table-bordered table-hover justify">
+        <thead>
+        <tr>
+            <th>Goal</th>
+            <th>Technical content</th>
+            <th>Evaluation</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="info">
+            <th colspan="3" class="center">First level : defining Java Classes and use it in an application</th>
+        </tr>
+        <tr>
+            <td>This is what we should have seen during the first courses: the
+                goal is to initiate you to
+                the Java ecosystem: manipulate basics of the language as much as discovering java tools such
+                as
+                Eclipse
+            </td>
+            <td>To achieve this point you should have:
+                <ul class="circle">
+                    <li>A Java project in Eclipse, containing what will be your core treatments (you could say
+                        your application logic)
+                    </li>
+                    <li><p>In this Java project, you have to define your own package (remember the good practices)
+                        to write your first Java Object: it has to be the classes defined in this document,
+                        please re-read the specification to find how to implement those classes.</p>
+
+                        <p> You also should be able to run some tests on the produced code:</p>
+                        <ul>
+                            <li>Instantiate some objects providing some console input </li>
+                            <li>Pass those instances to services that will store them</li>
+                            <li>display them in the console</li>
+                        </ul>
+                    </li>
+                </ul>
+            </td>
+            <td class="numerical">20</td>
+        </tr>
+        <tr class="info">
+            <th colspan="3" class="center">Second level : Find a way to persist a POJO</th>
+        </tr>
+        <tr>
+            <td>This is the most common problem in computer science, for achieving this part fully, you must be
+                able to store a list of Questions in an <strong>XML file</strong> or in a <strong>Data Base</strong>
+            </td>
+            <td>To achieve this point you should have:
+                <ul class="circle">
+                    <li>The previous point totally achieved
+                    </li>
+                    <li>
+                        If you chose the database connection, you should be able to connect to the database through a
+                        JDBC
+                        connection, manipulate the
+                        PreparedStatement and the Connection object, to read and record from / to the database
+                    </li>
+                    <li>
+                        If you chose the XML File persistence, you should use at least the DOM API to parse your XML
+                        file
+                        and read/write from/to the xml file.
+                    </li>
+                </ul>
+            </td>
+            <td class="numerical">40</td>
+        </tr>
+        <tr class="info">
+            <th colspan="3" class="center">Level three: Be professional</th>
+        </tr>
+        <tr>
+            <td><p>This point will stand for all the Quality and Documentation in the project, all your classes should
+                contain appropriate javadoc and comments (a tool evaluating your code quality will be used)</p>
+
+                <p>You also must provide a technical description of your architecture, this documentation should be in a
+                    standard format : odt, pdf, doc, docbook, dita, epub. This document is called <strong>Technical
+                        Specification</strong></p>
+
+                <p>You should provide a user guide on how to use the "public" part of your program. The public part of
+                    your
+                    program can either be a GUI or a set of APIs depending if you achieved to make a working GUI. This
+                    document is called the <strong>User guide</strong>. This user guide should be readable by someone
+                    who
+                    doesn't know about your program internal architecture.</p>
+
+
+            </td>
+            <td>To achieve this point you should have:
+                <ul class="circle">
+                    <li>A document indicating what your program is doing and how it is wired inside (what kind of APIs).
+                        Do
+                        not hesitate to provide schemas in this documentation, this is the Technical Specification
+                        document
+
+                    </li>
+                    <li>A document indicating how your program should be used, this is the User Guide
+                    </li>
+                    <li>You must export your javadoc in a jar called <code>javadoc.jar</code>, and put it in your
+                        project in
+                        a folder named "javadoc"
+                    </li>
+                    <li>
+                        The preceding requirement implies that you comment well your code, and especially the javadoc.
+                    </li>
+                </ul>
+            </td>
+            <td class="numerical">40</td>
+        </tr>
+        <tr class="info">
+            <td colspan="2">Total</td>
+            <td class="numerical"><strong>100</strong></td>
+        </tr>
+        <tr class="info">
+            <th colspan="3" class="center">Bonus points</th>
+        </tr>
+        <tr>
+            <td><strong>Make everything configurable:</strong>
+                This configuration will avoid hardcoded parameter like connection strings or file path. This is always
+                bad
+                in any application
+            </td>
+            <td>To achieve this point you should have:
+                <ul class="circle">
+                    <li>A global configuration class, which can read a configuration property set from a file on the
+                        filesystem (so the path to this file is hardcoded or given as an application parameter)
+                    </li>
+                    <li>
+                        Your configuration must be based on a standard format like <code>properties</code> or
+                        <code>XML</code>
+                    </li>
+                    <li>
+                        Try to list everything variable in your application and parameter it inside your configuration
+                        file
+                    </li>
+                </ul>
+            </td>
+            <td class="numerical">10</td>
+        </tr>
+        <tr>
+            <td>Do a GUI allowing to use your Quiz / Question / Choice APIs as well as your serializers/deserializers (DAOs).
+            </td>
+            <td>To achieve this point you should have:
+                <ul class="circle">
+                    <li>A GUI that can run as a desktop application
+                    </li>
+                    <li>
+                        This point should be made <strong>after</strong> you did the other elements listed above.
+                        I will not take it in account for the evaluation if you have not already made what is really
+                        required before.
+                    </li>
+                </ul>
+            </td>
+            <td class="numerical">20</td>
+        </tr>
+        </tbody>
+    </table>
+
+
+
+h2. Delivery
+
+h3. code delivery
+
+Your code source delivery has to be under a git format (prefer bitbucket for delivery to avoid cheating). Your package should include:
+- source code of the application
+- User Guide
+- Technical Guide
+- Compilation & Installation notice (if I'm not able to compile or run your application, the realization mark is set to 0)
+
+h3. How to submit?
+
+You have to send an email with the git url of your repository before the due date. The Subject of your mail should be under the format:
+
+[${YEAR}_fund-${NAMES}][PROJECT_SUBMISSION] 
+
+the destination email is the following :
+
+<a href="mailto:epita.submission@gmail.com">epita.submission@gmail.com</a>
+
+h3. When to submit ?
+
+The due date is set to be 3 weeks after the last lecture. If there are different groups, then it is 3 weeks after the last lecture for the last group.
+
+
+
+
+
+
+
